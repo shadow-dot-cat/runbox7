@@ -135,6 +135,9 @@ export class ContactsAppComponent {
                     if (result['group']) {
                         c.categories.push(result['group']);
                     }
+                    // we need a new ID for this contact (this is an add, not an edit)
+                    // let's remove the one that was in the VCF (if any)
+                    c.id = undefined;
                     this.contactsservice.saveContact(c);
                 }
             });
