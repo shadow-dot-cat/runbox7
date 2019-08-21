@@ -41,6 +41,7 @@ import { ContactDetailsComponent } from './contact-details/contact-details.compo
 import { ContactsSettingsComponent } from './contacts-settings.component';
 import { ContactsWelcomeComponent } from './contacts-welcome.component';
 import { FormArrayEditorComponent } from './contact-details/formarray-editor.component';
+import { FormControlCustomSelectFieldComponent } from './contact-details/form-control-custom-select-field.component';
 import { ContactsService } from './contacts.service';
 import { RMMRouteReuseStrategy } from './routereusestrategy';
 import { RMMAuthGuardService } from '../rmmapi/rmmauthguard.service';
@@ -54,6 +55,7 @@ import { VcfImportDialogComponent } from './vcf-import-dialog.component';
     ContactsSettingsComponent,
     ContactsWelcomeComponent,
     FormArrayEditorComponent,
+    FormControlCustomSelectFieldComponent,
     VcfImportDialogComponent,
   ],
   imports: [

@@ -1,23 +1,23 @@
 // --------- BEGIN RUNBOX LICENSE ---------
 // Copyright (C) 2016-2018 Runbox Solutions AS (runbox.com).
-// 
+//
 // This file is part of Runbox 7.
-// 
+//
 // Runbox 7 is free software: You can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
 // Free Software Foundation, either version 3 of the License, or (at your
 // option) any later version.
-// 
+//
 // Runbox 7 is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with Runbox 7. If not, see <https://www.gnu.org/licenses/>.
 // ---------- END RUNBOX LICENSE ----------
 
-import { Component, ElementRef, EventEmitter, Input, Output, OnChanges, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -41,10 +41,6 @@ export class ContactDetailsComponent {
     contactForm = this.createForm();
 
     groups = [];
-
-    newGroupPromptShown = false;
-    newGroupValue = '';
-    @ViewChild('newGroupInput') newGroupElement: ElementRef;
 
     constructor(
         public dialog: MatDialog,
@@ -230,24 +226,10 @@ export class ContactDetailsComponent {
         );
     }
 
-    showNewGroupPrompt(): void {
-        // clear the newly added 'undefined' from categories input
-        let categories = this.contactForm.get('categories').value;
-        categories = categories.filter(c => c);
-        this.contactForm.get('categories').setValue(categories);
-
-        this.newGroupPromptShown = true;
-        setTimeout(() => this.newGroupElement.nativeElement.focus());
-    }
-
-    confirmNewGroup(): void {
-        this.groups.push(this.newGroupValue);
-
+    newGroup(group: string): void {
+        this.groups.push(group);
         const categories = this.contactForm.get('categories').value;
-        categories.push(this.newGroupValue);
+        categories.push(group);
         this.contactForm.get('categories').setValue(categories);
-
-        this.newGroupValue = '';
-        this.newGroupPromptShown = false;
     }
 }

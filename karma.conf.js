@@ -34,6 +34,7 @@ module.exports = function (config) {
         flags: ['--no-sandbox', '--disable-gpu']
       }
     },
+    restartOnFileChange: true,
     singleRun: false
   });
 };

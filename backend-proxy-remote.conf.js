@@ -1,6 +1,6 @@
 let backendhostname = process.env.RUNBOX7_ANGULAR_BACKEND_HOST;
 if(!backendhostname) {
-    backendhostname = 'https://runbox.com';
+    backendhostname = 'https://gw01test.runbox.com:4086';
 }
 
 const PROXY_CONFIG = [
@@ -27,7 +27,7 @@ const PROXY_CONFIG = [
             }
         },
         "target": backendhostname,
-        "secure": true,
+        "secure": false,
         "cookieDomainRewrite": "localhost",
         "changeOrigin": true
         
