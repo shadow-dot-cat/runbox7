@@ -44,6 +44,14 @@ export class FormArrayEditorComponent implements OnInit {
 
     faObj: FormArray;
 
+    typesFor = {
+        'emails':    ['home', 'work'],
+        'addresses': ['home', 'work'],
+        'related':   ['child', 'spouse'],
+        'phones':    ['home', 'work', 'cell', 'fax'],
+        'urls':      ['personal', 'work'],
+    };
+
     constructor() {
     }
 
@@ -55,10 +63,10 @@ export class FormArrayEditorComponent implements OnInit {
         this.faObj.removeAt(i);
     }
 
-    /* unused as of now
-    addType(i: number): void {
-        const types  = this.faObj.at(i).get('types') as FormArray;
-        types.push(this.fb.control(''));
+    addType(i: number, typeName: string): void {
+        const typesFA = this.faObj.at(i).get('types') as FormArray;
+        const types = typesFA.value;
+        types.push(typeName);
+        typesFA.setValue(types);
     }
-    */
 }

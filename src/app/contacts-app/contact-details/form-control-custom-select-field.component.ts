@@ -17,7 +17,7 @@
 // along with Runbox 7. If not, see <https://www.gnu.org/licenses/>.
 // ---------- END RUNBOX LICENSE ----------
 
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 
 @Component({
@@ -55,7 +55,7 @@ import { FormControl } from '@angular/forms';
 </ng-template>
     `,
 })
-export class FormControlCustomSelectFieldComponent {
+export class FormControlCustomSelectFieldComponent implements OnInit {
     @Input() name: string;
     @Input() options: string[];
     @Input() inputFC: FormControl;
@@ -67,6 +67,15 @@ export class FormControlCustomSelectFieldComponent {
     promptShown = false;
 
     constructor() {
+    }
+
+    ngOnInit() {
+        // make sure that the provided values are among the options; if not, add them
+        for (const value of this.inputFC.value) {
+            if (!this.options.find(o => o === value)) {
+                this.options.push(value);
+            }
+        }
     }
 
     showNewPrompt() {

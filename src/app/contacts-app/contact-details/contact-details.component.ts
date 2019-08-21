@@ -144,30 +144,19 @@ export class ContactDetailsComponent {
             const formArray = this.contactForm.get(property) as FormArray;
             const formGroup = formGroupCreator();
             formArray.push(formGroup);
-
-            // also fixup empty types for the same reason as above
-            const e = this.contact[property][i];
-            if (e.types === null) {
-                e.types = [''];
-            }
-
-            for (let j = 0; j < e.types.length; j++) {
-                const typesFA = formGroup.get('types') as FormArray;
-                typesFA.push(this.fb.control(null));
-            }
         }
     }
 
     createEmailFG(types = []): FormGroup {
         return this.fb.group({
-            types: this.fb.array(types),
+            types: this.fb.control(types),
             value: this.fb.control(''),
         });
     }
 
     createAdrFG(types = []): FormGroup {
         return this.fb.group({
-            types: this.fb.array(types),
+            types: this.fb.control(types),
             value: this.fb.group({
                 street:      this.fb.control(''),
                 city:        this.fb.control(''),
