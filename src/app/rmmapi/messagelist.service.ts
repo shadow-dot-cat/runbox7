@@ -26,6 +26,7 @@ import { AppComponent } from '../app.component';
 import { CanvasTableColumn } from '../canvastable/canvastable';
 import { MessageTableRowTool } from '../messagetable/messagetablerow';
 import { catchError, map, filter, take } from 'rxjs/operators';
+import { ColumnEditComponent } from '../mailviewer/columnedit.component';
 
 export class FolderMessageCountEntry {
     constructor(
@@ -51,6 +52,8 @@ export class MessageListService {
     folderListSubject: BehaviorSubject<FolderListEntry[]> = new BehaviorSubject([]);
     folderMessageCountSubject: ReplaySubject<FolderMessageCountMap> = new ReplaySubject(1);
     folders: BehaviorSubject<any[]> = new BehaviorSubject([]);
+
+    colEdit: ColumnEditComponent = new ColumnEditComponent();
 
     currentFolder = 'Inbox';
 
@@ -268,69 +271,83 @@ export class MessageListService {
     }
 
     public getCanvasTableColumns(app: AppComponent): CanvasTableColumn[] {
-        const columns: CanvasTableColumn[] = [
-            {
-                sortColumn: null,
-                name: '',
-                rowWrapModeHidden: false,
-                getValue: (rowobj: MessageInfo): any => app.isSelectedRow(rowobj),
-                checkbox: true,
-                draggable: true
-            },
-            {
-                name: 'Date',
-                sortColumn: null,
-                rowWrapModeMuted: true,
-                getValue: (rowobj: MessageInfo): string => MessageTableRowTool.formatTimestamp(rowobj.messageDate.toJSON()),
-            },
-            {
-                name: this.currentFolder === 'Sent' ? 'To' : 'From',
-                sortColumn: null,
-                getValue: this.currentFolder === 'Sent' ? this.getToColumnValueForRow : this.getFromColumnValueForRow,
-            },
-            {
-                name: 'Subject',
-                sortColumn: null,
-                getValue: (rowobj: MessageInfo): string => rowobj.subject,
-                draggable: true
-            },
-            {
-                sortColumn: null,
-                name: 'Size',
-                rowWrapModeHidden: true,
-                textAlign: 1,
-                getValue: (rowobj: MessageInfo): number => rowobj.size,
-                getFormattedValue: MessageTableRowTool.formatBytes,
-            },
-            {
-                sortColumn: null,
-                name: '',
-                textAlign: 2,
-                rowWrapModeHidden: true,
-                font: '16px \'Material Icons\'',
-                getValue: (rowobj: MessageInfo): boolean => rowobj.attachment,
-                getFormattedValue: (val) => val ? '\uE226' : ''
-            },
-            {
-                sortColumn: null,
-                name: '',
-                textAlign: 2,
-                rowWrapModeHidden: true,
-                font: '16px \'Material Icons\'',
-                getValue: (rowobj: MessageInfo): boolean => rowobj.answeredFlag,
-                getFormattedValue: (val) => val ? '\uE15E' : ''
-            },
-            {
-                sortColumn: null,
-                name: '',
-                textAlign: 2,
-                rowWrapModeHidden: true,
-                font: '16px \'Material Icons\'',
-                getValue: (rowobj: MessageInfo): boolean => rowobj.flaggedFlag,
-                getFormattedValue: (val) => val ? '\uE153' : ''
-            }
-        ];
+        const testcolumns = this.colEdit.constructColumnList(
+            'messagelist',
+            new Map([
+                ['Date', (rowobj: MessageInfo): string => MessageTableRowTool.formatTimestamp(rowobj.messageDate.toJSON()) ],
+                ['To', this.getToColumnValueForRow ],
+                ['From', this.getFromColumnValueForRow ],
+                ['Subject', (rowobj: MessageInfo): string => rowobj.subject ],
+                ['Size', (rowobj: MessageInfo): number => rowobj.size ],
+                ['Attachment', (rowobj: MessageInfo): boolean => rowobj.attachment ],
+                ['Answered', (rowobj: MessageInfo): boolean => rowobj.answeredFlag ],
+                ['Flagged', (rowobj: MessageInfo): boolean => rowobj.attachment ],
+            ]),
+            app);
+        return testcolumns;
+        // const columns: CanvasTableColumn[] = [
+        //     {
+        //         sortColumn: null,
+        //         name: '',
+        //         rowWrapModeHidden: false,
+        //         getValue: (rowobj: MessageInfo): any => app.isSelectedRow(rowobj),
+        //         checkbox: true,
+        //         draggable: true
+        //     },
+        //     {
+        //         name: 'Date',
+        //         sortColumn: null,
+        //         rowWrapModeMuted: true,
+        //         getValue: (rowobj: MessageInfo): string => MessageTableRowTool.formatTimestamp(rowobj.messageDate.toJSON()),
+        //     },
+        //     {
+        //         name: this.currentFolder === 'Sent' ? 'To' : 'From',
+        //         sortColumn: null,
+        //         getValue: this.currentFolder === 'Sent' ? this.getToColumnValueForRow : this.getFromColumnValueForRow,
+        //     },
+        //     {
+        //         name: 'Subject',
+        //         sortColumn: null,
+        //         getValue: (rowobj: MessageInfo): string => rowobj.subject,
+        //         draggable: true
+        //     },
+        //     {
+        //         sortColumn: null,
+        //         name: 'Size',
+        //         rowWrapModeHidden: true,
+        //         textAlign: 1,
+        //         getValue: (rowobj: MessageInfo): number => rowobj.size,
+        //         getFormattedValue: MessageTableRowTool.formatBytes,
+        //     },
+        //     {
+        //         sortColumn: null,
+        //         name: '',
+        //         textAlign: 2,
+        //         rowWrapModeHidden: true,
+        //         font: '16px \'Material Icons\'',
+        //         getValue: (rowobj: MessageInfo): boolean => rowobj.attachment,
+        //         getFormattedValue: (val) => val ? '\uE226' : ''
+        //     },
+        //     {
+        //         sortColumn: null,
+        //         name: '',
+        //         textAlign: 2,
+        //         rowWrapModeHidden: true,
+        //         font: '16px \'Material Icons\'',
+        //         getValue: (rowobj: MessageInfo): boolean => rowobj.answeredFlag,
+        //         getFormattedValue: (val) => val ? '\uE15E' : ''
+        //     },
+        //     {
+        //         sortColumn: null,
+        //         name: '',
+        //         textAlign: 2,
+        //         rowWrapModeHidden: true,
+        //         font: '16px \'Material Icons\'',
+        //         getValue: (rowobj: MessageInfo): boolean => rowobj.flaggedFlag,
+        //         getFormattedValue: (val) => val ? '\uE153' : ''
+        //     }
+        // ];
 
-        return columns;
+        // return columns;
     }
 }

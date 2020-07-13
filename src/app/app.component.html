@@ -116,7 +116,7 @@
           (searchexpression)="searchFor($event)">
         </app-multiple-search-fields-input>
         <mat-form-field id="searchField" style="flex-grow: 1" floatLabel="auto"
-          *ngIf="searchService.downloadProgress===null">
+          *ngIf="searchService.downloadProgress===null && !showMailColumnEditor">
           <input matInput #searchInputField type="text"
             (focus)="searchTextFieldFocus()"
             (blur)="searchTextFieldBlur()" [placeholder]="dynamicSearchFieldPlaceHolder ? dynamicSearchFieldPlaceHolder: 'Start typing to search messages'"
@@ -132,6 +132,13 @@
             matTooltip="Multiple search fields">
             <mat-icon>build</mat-icon>
           </button>
+          <button *ngIf="!showMailColumnEditor"
+            mat-icon-button
+            matSuffix
+            (click)="showMailColumnEditor = true"
+            matTooltip="Edit Column Display">
+            <mat-icon>view_column</mat-icon>
+          </button>
           <button *ngIf="searchText!==''"
             mat-icon-button
             matSuffix
@@ -140,6 +147,10 @@
             <mat-icon>clear</mat-icon>
           </button>
         </mat-form-field>
+        <div *ngIf="showMailColumnEditor" style="flex-grow: 1">
+          <app-columnedit [editcolumns]="['one', 'two', 'three', 'four']">
+          </app-columnedit>
+        </div>
 
         <button mat-icon-button (click)="updateViewMode('conversations')" *ngIf="!searchtextfieldfocused && viewmode==='singleconversation'"
           matTooltip="Back to conversations list">

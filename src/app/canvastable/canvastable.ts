@@ -190,7 +190,7 @@ export class CanvasTableComponent implements AfterViewInit, DoCheck, OnInit {
       this.hasSortColumns = columns.filter(col => col.sortColumn !== null).length > 0;
       this.hasChanges = true;    }
   }
-
+  public extraRowData: Map<string, any> = new Map();
   // Colors retrieved from css classes
   textColorLink: string = getCSSClassProperty('themePalettePrimary', 'color');
   selectedRowColor: string = getCSSClassProperty('themePaletteAccentLighter', 'color');
@@ -1036,6 +1036,7 @@ export class CanvasTableComponent implements AfterViewInit, DoCheck, OnInit {
 
       const halfrowheight = (this.rowheight / 2);
       const rowy = (rowIndex - this.topindex) * this.rowheight;
+      let previewText: string;
       if (rowobj) {
         // Clear row area
         // Alternating row colors:
@@ -1065,6 +1066,10 @@ export class CanvasTableComponent implements AfterViewInit, DoCheck, OnInit {
         this.ctx.moveTo(0, rowy);
         this.ctx.lineTo(canvwidth, rowy);
         this.ctx.stroke();
+
+        if (this.extraRowData.has('_Preview') != null) {
+          previewText = this.extraRowData.get('_Preview')(rowobj);
+        }
 
         let x = 0;
         for (let colindex = 0; colindex < this.columns.length; colindex++) {
@@ -1262,11 +1267,8 @@ export class CanvasTableComponent implements AfterViewInit, DoCheck, OnInit {
       } else {
         break;
       }
-      if (this.showContentTextPreview) {
-        const contentTextPreviewColumn = this.columns
-          .find(col => col.getContentPreviewText ? true : false);
-        if (contentTextPreviewColumn) {
-          const contentPreviewText = contentTextPreviewColumn.getContentPreviewText(rowobj);
+      if (this.showContentTextPreview && previewText != null) {
+        const contentPreviewText = previewText;
           if (contentPreviewText) {
             this.ctx.save();
             this.ctx.fillStyle = this.textColor;
@@ -1276,7 +1278,6 @@ export class CanvasTableComponent implements AfterViewInit, DoCheck, OnInit {
               rowy + halfrowheight + (this.rowWrapMode ? 18 : 15));
             this.ctx.restore();
           }
-        }
       }
 
       if (rowy > canvheight) {

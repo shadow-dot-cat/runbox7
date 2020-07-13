@@ -36,6 +36,7 @@ import { SingleMailViewerComponent, ShowHTMLDialogComponent } from './singlemail
 import { ResizerModule } from '../directives/resizer.module';
 import { ContactCardComponent } from './contactcard.component';
 export { SingleMailViewerComponent } from './singlemailviewer.component';
+import { ColumnEditComponent } from './columnedit.component';
 
 @NgModule({
     imports: [
@@ -56,12 +57,14 @@ export { SingleMailViewerComponent } from './singlemailviewer.component';
         MatExpansionModule
     ],
     exports: [
-        SingleMailViewerComponent
+      SingleMailViewerComponent,
+      ColumnEditComponent
     ],
     declarations: [
         ContactCardComponent,
         SingleMailViewerComponent,
-        ShowHTMLDialogComponent
+        ShowHTMLDialogComponent,
+        ColumnEditComponent
     ],
     entryComponents: [
         ShowHTMLDialogComponent

@@ -37,6 +37,7 @@ import { DownloadableSearchIndexMap, DownloadablePartition } from './downloadabl
 import { SyncProgressComponent } from './syncprogress.component';
 import { xapianLoadedSubject } from './xapianwebloader';
 import { InfoDialog, InfoParams } from '../dialog/info.dialog';
+import { ColumnEditComponent } from '../mailviewer/columnedit.component';
 
 declare var FS;
 declare var IDBFS;
@@ -142,6 +143,7 @@ export class SearchService {
    */
   currentXapianDocId: number;
   currentDocData: SearchIndexDocumentData;
+  colEdit: ColumnEditComponent = new ColumnEditComponent();
 
   constructor(public rmmapi: RunboxWebmailAPI,
        private httpclient: HttpClient,
@@ -1208,147 +1210,179 @@ export class SearchService {
         return this.currentDocData;
     }
 
+    public getExtraRowData(): Map<string, any> {
+        return new Map([['_Preview', (rowobj): string => {
+            const ret = this.getDocData(rowobj[0]).textcontent;
+            return ret ? ret.trim() : '';
+        } ] ] );
+    }
     public getCanvasTableColumns(app: AppComponent): CanvasTableColumn[] {
-      const columns: CanvasTableColumn[] = [
-              {
-                  sortColumn: null,
-                  name: '',
-                  rowWrapModeHidden: false,
-                  getValue: (rowobj): any => app.isSelectedRow(rowobj),
-                  checkbox: true,
-            },
-            {
-              name: 'Date',
-              sortColumn: 2,
-              rowWrapModeMuted : true,
-              getValue: (rowobj): string => {
-                const datestring = this.api.getStringValue(rowobj[0], 2);
-                return MessageTableRowTool.formatTimestampFromStringWithoutSeparators(datestring);
-              },
-            },
-            (app.selectedFolder.indexOf('Sent') === 0 && !app.displayFolderColumn) ? {
-              name: 'To',
-              sortColumn: null,
-              getValue: (rowobj): string => this.getDocData(rowobj[0]).recipients.join(', '),
-            } :
-            {
-              name: 'From',
-              sortColumn: 0,
-              getValue: (rowobj): string => {
-                return this.getDocData(rowobj[0]).from;
-              },
-            },
-            {
-              name: 'Subject',
-              sortColumn: 1,
-              getValue: (rowobj): string => {
-                return this.getDocData(rowobj[0]).subject;
-              },
-              draggable: true,
-              getContentPreviewText: (rowobj): string => {
-                const ret = this.getDocData(rowobj[0]).textcontent;
-                return ret ? ret.trim() : '';
-              },
-              // tooltipText: 'Tip: Drag subject to a folder to move message(s)'
-            }
-        ];
+        const testcolumns = this.colEdit.constructColumnList(
+            'searchservice',
+            new Map([
+                ['Date', (rowobj): string => {
+                 const datestring = this.api.getStringValue(rowobj[0], 2);
+                  return MessageTableRowTool.formatTimestampFromStringWithoutSeparators(datestring); } ],
+                ['To', (rowobj): string => this.getDocData(rowobj[0]).recipients.join(', ') ],
+                ['From', (rowobj): string => {
+                  return this.getDocData(rowobj[0]).from;
+                } ],
+                ['Subject', (rowobj): string => {
+                  return this.getDocData(rowobj[0]).subject;
+                } ],
+                ['Size', (rowobj): string => {
+                  return  `${this.api.getNumericValue(rowobj[0], 3)}`;
+                } ],
+                ['Attachment', (rowobj): boolean => this.getDocData(rowobj[0]).attachment ? true : false ],
+                ['Answered', (rowobj): boolean => this.getDocData(rowobj[0]).answered ? true : false ],
+                ['Flagged', (rowobj): boolean => this.getDocData(rowobj[0]).flagged ? true : false ],
+                // ['_Preview', (rowobj): string => {
+                //     const ret = this.getDocData(rowobj[0]).textcontent;
+                //     return ret ? ret.trim() : '';
+                // } ],
+            ]),
+            app);
+        return testcolumns;
+      // const columns: CanvasTableColumn[] = [
+      //         {
+      //             sortColumn: null,
+      //             name: '',
+      //             rowWrapModeHidden: false,
+      //             getValue: (rowobj): any => app.isSelectedRow(rowobj),
+      //             checkbox: true,
+      //       },
+      //       {
+      //         name: 'Date',
+      //         sortColumn: 2,
+      //         rowWrapModeMuted : true,
+      //         getValue: (rowobj): string => {
+      //           const datestring = this.api.getStringValue(rowobj[0], 2);
+      //           return MessageTableRowTool.formatTimestampFromStringWithoutSeparators(datestring);
+      //         },
+      //       },
+      //       (app.selectedFolder.indexOf('Sent') === 0 && !app.displayFolderColumn) ? {
+      //         name: 'To',
+      //         sortColumn: null,
+      //         getValue: (rowobj): string => this.getDocData(rowobj[0]).recipients.join(', '),
+      //       } :
+      //       {
+      //         name: 'From',
+      //         sortColumn: 0,
+      //         getValue: (rowobj): string => {
+      //           return this.getDocData(rowobj[0]).from;
+      //         },
+      //       },
+      //       {
+      //         name: 'Subject',
+      //         sortColumn: 1,
+      //         getValue: (rowobj): string => {
+      //           return this.getDocData(rowobj[0]).subject;
+      //         },
+      //         draggable: true,
+      //         getContentPreviewText: (rowobj): string => {
+      //           const ret = this.getDocData(rowobj[0]).textcontent;
+      //           return ret ? ret.trim() : '';
+      //         },
+      //         // tooltipText: 'Tip: Drag subject to a folder to move message(s)'
+      //       }
+      //   ];
 
-        if (app.viewmode === 'conversations') {
-          // Array containing row (conversation) objects waiting to be counted
-          let currentCountObject = null;
+      //   if (app.viewmode === 'conversations') {
+      //     // Array containing row (conversation) objects waiting to be counted
+      //     let currentCountObject = null;
 
-          const processCurrentCountObject = () => {
-            // Function for counting messages in a conversation
-            const rowobj = currentCountObject;
-            const conversationId = this.api.getStringValue(rowobj[0], 1);
-            this.api.setStringValueRange(1, 'conversation:');
-            const conversationSearchText = `conversation:${conversationId}..${conversationId}`;
-            const results = this.api.sortedXapianQuery(
-              conversationSearchText,
-              1, 0, 0, 1000, 1
-            );
-            this.api.clearValueRange();
-            rowobj[2] = `${results[0][1] + 1}`;
+      //     const processCurrentCountObject = () => {
+      //       // Function for counting messages in a conversation
+      //       const rowobj = currentCountObject;
+      //       const conversationId = this.api.getStringValue(rowobj[0], 1);
+      //       this.api.setStringValueRange(1, 'conversation:');
+      //       const conversationSearchText = `conversation:${conversationId}..${conversationId}`;
+      //       const results = this.api.sortedXapianQuery(
+      //         conversationSearchText,
+      //         1, 0, 0, 1000, 1
+      //       );
+      //       this.api.clearValueRange();
+      //       rowobj[2] = `${results[0][1] + 1}`;
 
-            currentCountObject = null;
-          };
+      //       currentCountObject = null;
+      //     };
 
-          columns.push(
-            {
-              name: 'Count',
-              sortColumn: null,
-              rowWrapModeChipCounter: true,
-              getValue: (rowobj): string => {
-                if (!rowobj[2]) {
-                  if (currentCountObject === null) {
-                    currentCountObject = rowobj;
-                    setTimeout(() => processCurrentCountObject(), 0);
-                  }
-                  return 'RETRY';
-                } else {
-                  return rowobj[2];
-                }
-              },
-              textAlign: 1,
-            });
-        } else {
-          columns.push(
-            {
-              sortColumn: 3,
-              name: 'Size',
-              rowWrapModeHidden: true,
-              textAlign: 1,
-              getValue: (rowobj): string => {
-                return  `${this.api.getNumericValue(rowobj[0], 3)}`;
-              },
-              getFormattedValue: (val) => val === '-1' ? '\u267B' : MessageTableRowTool.formatBytes(val),
-              tooltipText: (rowobj) => this.api.getNumericValue(rowobj[0], 3) === -1 ?
-                          'This message is marked for deletion by an IMAP client' : null
-            });
+      //     columns.push(
+      //       {
+      //         name: 'Count',
+      //         sortColumn: null,
+      //         rowWrapModeChipCounter: true,
+      //         getValue: (rowobj): string => {
+      //           if (!rowobj[2]) {
+      //             if (currentCountObject === null) {
+      //               currentCountObject = rowobj;
+      //               setTimeout(() => processCurrentCountObject(), 0);
+      //             }
+      //             return 'RETRY';
+      //           } else {
+      //             return rowobj[2];
+      //           }
+      //         },
+      //         textAlign: 1,
+      //       });
+      //   } else {
+      //     columns.push(
+      //       {
+      //         sortColumn: 3,
+      //         name: 'Size',
+      //         rowWrapModeHidden: true,
+      //         textAlign: 1,
+      //         getValue: (rowobj): string => {
+      //           return  `${this.api.getNumericValue(rowobj[0], 3)}`;
+      //         },
+      //         getFormattedValue: (val) => val === '-1' ? '\u267B' : MessageTableRowTool.formatBytes(val),
+      //         tooltipText: (rowobj) => this.api.getNumericValue(rowobj[0], 3) === -1 ?
+      //                     'This message is marked for deletion by an IMAP client' : null
+      //       });
 
-          columns.push({
-              sortColumn: null,
-              name: '',
-              textAlign: 2,
-              rowWrapModeHidden: true,
-              font: '16px \'Material Icons\'',
-              getValue: (rowobj: MessageInfo): boolean => this.getDocData(rowobj[0]).attachment ? true : false,
-              width: 35,
-              getFormattedValue: (val) => val ? '\uE226' : ''
-          });
-          columns.push({
-              sortColumn: null,
-              name: '',
-              textAlign: 2,
-              rowWrapModeHidden: true,
-              font: '16px \'Material Icons\'',
-              getValue: (rowobj: MessageInfo): boolean => this.getDocData(rowobj[0]).answered ? true : false,
-              width: 35,
-              getFormattedValue: (val) => val ? '\uE15E' : ''
-          });
-          columns.push({
-              sortColumn: null,
-              name: '',
-              textAlign: 2,
-              rowWrapModeHidden: true,
-              font: '16px \'Material Icons\'',
-              getValue: (rowobj: MessageInfo): boolean => this.getDocData(rowobj[0]).flagged ? true : false,
-              width: 35,
-              getFormattedValue: (val) => val ? '\uE153' : ''
-          });
+      //     columns.push({
+      //         sortColumn: null,
+      //         name: '',
+      //         textAlign: 2,
+      //         rowWrapModeHidden: true,
+      //         font: '16px \'Material Icons\'',
+      //         getValue: (rowobj: MessageInfo): boolean => this.getDocData(rowobj[0]).attachment ? true : false,
+      //         width: 35,
+      //         getFormattedValue: (val) => val ? '\uE226' : ''
+      //     });
+      //     columns.push({
+      //         sortColumn: null,
+      //         name: '',
+      //         textAlign: 2,
+      //         rowWrapModeHidden: true,
+      //         font: '16px \'Material Icons\'',
+      //         getValue: (rowobj: MessageInfo): boolean => this.getDocData(rowobj[0]).answered ? true : false,
+      //         width: 35,
+      //         getFormattedValue: (val) => val ? '\uE15E' : ''
+      //     });
+      //     columns.push({
+      //         sortColumn: null,
+      //         name: '',
+      //         textAlign: 2,
+      //         rowWrapModeHidden: true,
+      //         font: '16px \'Material Icons\'',
+      //         getValue: (rowobj: MessageInfo): boolean => this.getDocData(rowobj[0]).flagged ? true : false,
+      //         width: 35,
+      //         getFormattedValue: (val) => val ? '\uE153' : ''
+      //     });
 
-          if (app.displayFolderColumn) {
-            columns.push({
-              sortColumn: null,
-              name: 'Folder',
-              rowWrapModeHidden: true,
-              getValue: (rowobj): string => this.getDocData(rowobj[0]).folder.replace(/\./g, '/'),
-              width: 200
-            });
-          }
+      //     if (app.displayFolderColumn) {
+      //       columns.push({
+      //         sortColumn: null,
+      //         name: 'Folder',
+      //         rowWrapModeHidden: true,
+      //         getValue: (rowobj): string => this.getDocData(rowobj[0]).folder.replace(/\./g, '/'),
+      //         width: 200
+      //       });
+      //     }
 
-        }
-        return columns;
+      //   }
+      //   return columns;
     }
 }
 

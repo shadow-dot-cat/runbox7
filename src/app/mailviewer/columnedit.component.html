@@ -1,0 +1,11 @@
+<mat-grid-list cols="4" rowHeight="20px">
+  <mat-grid-tile *ngFor="let editcol of editcolumns">
+    <div
+      draggable="true"
+      (dragstart)="columnDragged($event, editcol)"
+      (drop)="columnDropped($event)"
+      >
+      {{editcol}}
+    </div>
+  </mat-grid-tile>
+</mat-grid-list>

@@ -58,6 +58,7 @@ import { RMM } from './rmm';
 import { environment } from '../environments/environment';
 import { LogoutService } from './login/logout.service';
 import {Hotkey, HotkeysService} from 'angular2-hotkeys';
+import { ColumnEditComponent } from './mailviewer/columnedit.component';
 
 const LOCAL_STORAGE_SETTING_MAILVIEWER_ON_RIGHT_SIDE_IF_MOBILE = 'mailViewerOnRightSideIfMobile';
 const LOCAL_STORAGE_SETTING_MAILVIEWER_ON_RIGHT_SIDE = 'mailViewerOnRightSide';
@@ -87,6 +88,7 @@ export class AppComponent implements OnInit, AfterViewInit, CanvasTableSelectLis
   keepMessagePaneOpen = true;
   conversationGroupingCheckbox = false;
   unreadMessagesOnlyCheckbox = false;
+  personalviewcolumns: string[];
 
   indexDocCount = 0;
 
@@ -104,6 +106,7 @@ export class AppComponent implements OnInit, AfterViewInit, CanvasTableSelectLis
   openedRowId: number;
   searchtextfieldfocused = false;
 
+  showMailColumnEditor = false;
   showMultipleSearchFields = false;
   showingSearchResults = false; // Toggle if showing from message list or xapian search
   showingWebSocketSearchResults = false;
@@ -936,6 +939,8 @@ export class AppComponent implements OnInit, AfterViewInit, CanvasTableSelectLis
   resetColumns() {
     if (this.showingSearchResults) {
       this.canvastable.columns = this.searchService.getCanvasTableColumns(this);
+      this.canvastable.extraRowData = this.searchService.getExtraRowData();
+      // this.canvastable.columns = this.searchService.getCanvasTableColumns(this);
     } else if (this.showingWebSocketSearchResults) {
       this.canvastable.columns = this.websocketsearchservice.getCanvasTableColumns(this);
     } else {
