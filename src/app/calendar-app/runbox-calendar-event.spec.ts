@@ -57,24 +57,60 @@ describe('RunboxCalendarEvent', () => {
     });
 
     it('should be possible to add a special case to a recurring event', () => {
-        const todayStr = moment().toISOString().split('T')[0];
-        const yesterday = moment().subtract(1, 'day');
         const sut = new RunboxCalendarEvent(
-            'testcal/testev', new ICAL.Event(new ICAL.Component(['vcalendar', [], [
-                [ 'vevent', [
-                    [ 'dtstart', {}, 'date',  todayStr ],
-                    [ 'dtend',   {}, 'date',  todayStr ],
+            'testcal/testev', new ICAL.Event(new ICAL.Component([
+                'vevent', [
+                  [ 'dtstart', {}, 'date',  '2021-01-25' ],
+                    [ 'dtend',   {}, 'date',  '2021-01-25' ],
                     [ 'summary', {}, 'text',  'Weekly event' ],
                     [ 'uid',     {}, 'text',  'unittestcase1' ],
                     [ 'rrule',   {}, 'recur', { 'freq': 'WEEKLY' } ],
-                ] ]
-            ]])), ICAL.Time.fromJSDate(new Date()), ICAL.Time.fromJSDate(new Date()),
+                ]
+            ])), ICAL.Time.fromDateString('2021-02-01'), ICAL.Time.fromDateString('2021-02-01'),
         );
 
-      const future = moment().add(1, 'week').add(3, 'day');
-      // FIXME
-        // const events = sut.recurrences(yesterday.toDate(), future.toDate());
+      expect(sut.toIcal()).toBe(
+`BEGIN:VCALENDAR
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20210125
+DTEND;VALUE=DATE:20210125
+SUMMARY:Weekly event
+UID:unittestcase1
+RRULE:FREQ=WEEKLY
+END:VEVENT
+END:VCALENDAR`);
+      const future = moment('2021-01-25').add(1, 'week').add(3, 'day');
+      // Feb 4th?
+      sut.updateEvent(
+        future,
+        future,
+        sut.calendar,
+        '1', // 'This event only', should probably be an enum
+        'Moved weekly event',undefined,undefined,
+        true,
+        sut.recurringFrequency,
+        sut.recurInterval,
+        undefined,undefined,undefined, // and optional params..
+      );
 
+      expect(sut.toIcal()).toBe(
+`BEGIN:VCALENDAR
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20210125
+DTEND;VALUE=DATE:20210125
+SUMMARY:Weekly event
+UID:unittestcase1
+RRULE:FREQ=WEEKLY
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20210204
+DTEND;VALUE=DATE:20210204
+RECURRENCEID:VALUE=DATE:20210125
+SUMMARY:Moved weekly event
+UID:unittestcase1
+RECURRENCE-ID;VALUE=DATE:20210201
+END:VEVENT
+END:VCALENDAR`);
         // expect(events.length).toBe(2);
         // expect(events[0].dtstart.isSame(events[1].dtstart)).toBe(false);
 
