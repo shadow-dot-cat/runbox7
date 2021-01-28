@@ -1,5 +1,5 @@
 <h1 mat-dialog-title>{{ event_title || "New event" }}</h1>
-<section mat-dialog-content>
+<section mat-dialog-content style="width: 500px; box-sizing: border-box;">
   <mat-tab-group>
     <mat-tab label="Details">
     <style>
@@ -75,7 +75,7 @@
         </p><p>
           <ng-container *ngIf="recurring_frequency == 'WEEKLY'" style="margin-top: 10px;display: flex;">
             <mat-label> on day(s) </mat-label>
-            <mat-checkbox *ngFor="let wday of weekdays" (selectionChange)="updateWeekdays()" [(ngModel)]="wday.recurs_on" [value]="wday.val" [disabled]="!event_recurs">{{ wday.name }}</mat-checkbox>
+            <mat-checkbox style="padding: 0 5px;" *ngFor="let wday of weekdays" (selectionChange)="updateWeekdays()" [(ngModel)]="wday.recurs_on" [value]="wday.val" [disabled]="!event_recurs">{{ wday.name }}</mat-checkbox>
           </ng-container>
         </p>
         <ng-container *ngIf="recurring_frequency == 'MONTHLY' || recurring_frequency == 'YEARLY'" style="margin-top: 10px;display: flex;">
@@ -111,8 +111,6 @@
     </p>
     </mat-tab>
   </mat-tab-group>
-</section>
-<section mat-dialog-actions style="justify-content: flex-end;">
     <ng-container>
         <mat-form-field style="margin-top: 10px;">
             <mat-label> modify which events? </mat-label>
@@ -123,18 +121,22 @@
             </mat-select>
         </mat-form-field>
     </ng-container>
+</section>
 
-    <button *ngIf="event.id"
-            mat-raised-button color="warn"
-            (click)="onDeleteClick()">Delete this event</button>
+<section mat-dialog-actions style="display: flex; justify-content: space-between;">
+    <span>
+        <button *ngIf="event.id"
+        mat-raised-button color="warn"
+        (click)="onDeleteClick()">Delete</button>
+    </span>
 
-    <button mat-button
+    <span>
+        <button mat-raised-button color="accent"
             (click)="onCancelClick()">Cancel</button>
-
-    <button id="eventSubmitButton" mat-raised-button color="primary"
-            (click)="onSubmitClick()">
-        <span *ngIf="event.id">  Update </span>
-        <span *ngIf="!event.id"> Create </span>
-    </button>
-
+        <button id="eventSubmitButton" mat-raised-button color="primary"
+                (click)="onSubmitClick()">
+            <span *ngIf="event.id">  Update </span>
+            <span *ngIf="!event.id"> Create </span>
+        </button>
+    </span>
 </section>
