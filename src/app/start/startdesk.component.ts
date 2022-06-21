@@ -20,7 +20,7 @@
 import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 
-import { MailAddressInfo } from 'runbox-searchindex/mailaddressinfo';
+import { MailAddressInfo } from '../common/mailaddressinfo';
 import moment from 'moment';
 
 import { Contact } from '../contacts-app/contact';

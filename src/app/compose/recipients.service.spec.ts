@@ -24,7 +24,7 @@ import { SearchService } from '../xapian/searchservice';
 import { StorageService } from '../storage.service';
 import { AsyncSubject, of, Subject } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { XapianAPI } from 'runbox-searchindex/rmmxapianapi';
+import { XapianAPI } from '@runboxcom/runbox-searchindex/rmmxapianapi';
 import { xapianLoadedSubject } from '../xapian/xapianwebloader';
 import { Contact } from '../contacts-app/contact';
 import { RunboxWebmailAPI } from '../rmmapi/rbwebmail';
