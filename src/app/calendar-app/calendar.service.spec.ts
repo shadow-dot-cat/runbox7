@@ -179,7 +179,7 @@ END:VCALENDAR
     });
 
     it('should modify event when asked', async () => {
-        await new Promise(r => sut.eventSubject.pipe(take(1)).subscribe(events => {
+        await new Promise<void>(r => sut.eventSubject.pipe(take(1)).subscribe(events => {
             expect(sut.icalevents.length).toBe(2, '2 ical events found');
             expect(events.length).toBe(6, '6 events generated');
             const event = events[0];
@@ -188,7 +188,7 @@ END:VCALENDAR
             r();
         }));
 
-        await new Promise(r => sut.eventSubject.pipe(take(1)).subscribe(events => {
+        await new Promise<void>(r => sut.eventSubject.pipe(take(1)).subscribe(events => {
             expect(sut.icalevents.length).toBe(2, '2 ical events found');
             expect(events.length).toBe(6, '6 events loaded');
             const event = events[0];
@@ -205,7 +205,7 @@ END:VCALENDAR
         expect(sut.icalevents.length).toBe(0, 'No ical events found');
         expect(sut.events.length).toBe(0, 'No events loaded');
 
-        await new Promise(r => sut.eventSubject.pipe(take(1)).subscribe(events => {
+        await new Promise<void>(r => sut.eventSubject.pipe(take(1)).subscribe(events => {
             expect(sut.icalevents.length).toBe(2, '2 ical events found');
             expect(events.length).toBe(6, '6 events loaded');
             events[0].calendar = 'test2';
@@ -213,7 +213,7 @@ END:VCALENDAR
             r();
         }));
 
-        await new Promise(r => sut.eventSubject.pipe(take(1)).subscribe(events => {
+        await new Promise<void>(r => sut.eventSubject.pipe(take(1)).subscribe(events => {
             expect(sut.icalevents.length).toBe(2, '2 ical events found');
             expect(events.length).toBe(6, '6 events loaded');
             const event = events[0];

@@ -165,7 +165,7 @@ describe('SearchService', () => {
         expect(searchService.indexUpdateIntervalId).toBeTruthy();
         clearTimeout(searchService.indexUpdateIntervalId);
 
-        await new Promise(resolve => {
+        await new Promise<void>(resolve => {
             console.log('Deleting database');
             const idbreq = window.indexedDB.deleteDatabase('/' + searchService.localdir);
             idbreq.onsuccess = () => resolve();

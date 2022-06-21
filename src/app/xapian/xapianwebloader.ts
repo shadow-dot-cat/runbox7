@@ -392,7 +392,7 @@ function patchIDBFS() {
             create.sort();
 
             let prepareIndex = 0;
-            new Promise((resolve) => {
+            new Promise<void>((resolve) => {
                 const prepareOne = () => {
                     setTimeout(() =>  {
                         if (prepareIndex < create.length) {

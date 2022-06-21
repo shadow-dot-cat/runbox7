@@ -120,7 +120,7 @@ export class AccountRenewalsComponent {
     }
 
     toggleAutorenew(p: ActiveProduct) {
-        p.changingAutorenew = new Promise((resolve, reject) => {
+        p.changingAutorenew = new Promise<void>((resolve, reject) => {
             this.rmmapi.setProductAutorenew(p.apid, !p.active).subscribe(
                 _ => {
                     p.active = !p.active;
