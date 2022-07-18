@@ -319,7 +319,7 @@ export class AppComponent implements OnInit, AfterViewInit, CanvasTableSelectLis
     this.resetColumns();
 
     this.messagelistservice.messagesInViewSubject.subscribe(res => {
-      this.messagelist = res;
+      this.messagelist = res ? res : [];
       if (!this.showingSearchResults && !this.showingWebSocketSearchResults
          && res) {
         this.setMessageDisplay('messagelist', this.messagelist);
