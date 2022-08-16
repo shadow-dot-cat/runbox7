@@ -22,13 +22,25 @@ import { RunboxCalendarView } from './runbox-calendar-view';
 export class CalendarSettings {
     weekStartsOnSunday = false;
     lastUsedView: RunboxCalendarView = RunboxCalendarView.Month;
+    displayTimezone: string;
 
-    constructor(props: any) {
-        if ('weekStartsOnSunday' in props) {
-            this.weekStartsOnSunday = props['weekStartsOnSunday'];
+    load() {
+        const props = JSON.parse(localStorage.getItem('calendarSettings'));
+        if (props) {
+            if ('weekStartsOnSunday' in props) {
+                this.weekStartsOnSunday = props['weekStartsOnSunday'];
+            }
+            if ('lastUsedView' in props) {
+                this.lastUsedView = props['lastUsedView'];
+            }
+            if ('displayTimezone' in props) {
+                this.displayTimezone = props['displayTimezone'];
+            }
         }
-        if ('lastUsedView' in props) {
-            this.lastUsedView = props['lastUsedView'];
-        }
+    }
+
+    save() {
+        localStorage.setItem('calendarSettings', JSON.stringify(this));
+
     }
 }

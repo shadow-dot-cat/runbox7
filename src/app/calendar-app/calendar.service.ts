@@ -20,6 +20,7 @@
 import { RunboxCalendar } from './runbox-calendar';
 import { RunboxCalendarEvent } from './runbox-calendar-event';
 import { RunboxWebmailAPI, RunboxMe } from '../rmmapi/rbwebmail';
+import { CalendarSettings } from './calendar-settings';
 import { StorageService } from '../storage.service';
 import { BackgroundActivityService } from '../common/background-activity.service';
 import { ViewPeriod } from 'calendar-utils';
@@ -63,6 +64,7 @@ export class CalendarService implements OnDestroy {
     activities      = new BackgroundActivityService<Activity>();
 
     me: RunboxMe    = new RunboxMe();
+    settings        = new CalendarSettings();
 
     userTimezoneLoaded = new AsyncSubject<ICAL.Timezone>();
 
@@ -70,6 +72,7 @@ export class CalendarService implements OnDestroy {
         private rmmapi:  RunboxWebmailAPI,
         private storage: StorageService,
     ) {
+        this.settings.load();
         // Load user's predefined timezone, and register a corresponding
         // VTIMEZONE for their events to use
         this.rmmapi.me.subscribe(me => {

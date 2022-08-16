@@ -49,7 +49,6 @@ import {
 import { ViewPeriod } from 'calendar-utils';
 
 import { CalendarService } from './calendar.service';
-import { CalendarSettings } from './calendar-settings';
 import { MobileQueryService } from '../mobile-query.service';
 import { UsageReportsService } from '../common/usage-reports.service';
 
@@ -84,7 +83,6 @@ export class CalendarAppComponent implements OnDestroy {
     viewPeriod: ViewPeriod;
     activeDayIsOpen = false;
     sideMenuOpened = true;
-    settings = new CalendarSettings({});
 
     refresh: Subject<any> = new Subject();
     viewRefreshInterval: any;
@@ -109,11 +107,7 @@ export class CalendarAppComponent implements OnDestroy {
         private snackBar: MatSnackBar,
         private usage:    UsageReportsService,
     ) {
-        const storedSettings = localStorage.getItem('calendarSettings');
-        if (storedSettings) {
-            this.settings = new CalendarSettings(JSON.parse(storedSettings));
-            this.setView(this.settings.lastUsedView);
-        }
+        this.setView(this.calendarservice.settings.lastUsedView);
         this.calendarservice.errorLog.subscribe(e => this.showError(e));
         this.calendarservice.calendarSubject.subscribe((calendars) => {
             this.calendars = calendars.sort((a, b) => a.displayname.localeCompare(b.displayname));
@@ -164,7 +158,7 @@ export class CalendarAppComponent implements OnDestroy {
         const new_event = RunboxCalendarEvent.newEmpty(this.calendarservice.me.timezone);
         new_event.timezone = this.calendarservice.me.timezone;
         const dialogRef = this.dialog.open(EventEditorDialogComponent, {
-            data: { event: new_event, calendars: this.calendars, settings: this.settings, start: on, is_new: true } }
+            data: { event: new_event, calendars: this.calendars, settings: this.calendarservice.settings, start: on, is_new: true } }
         );
         dialogRef.afterClosed().subscribe(event => {
             if (event) {
@@ -270,7 +264,7 @@ export class CalendarAppComponent implements OnDestroy {
     openEvent(event: CalendarEvent): void {
         const target = event as RunboxCalendarEvent;
         const dialogRef = this.dialog.open(EventEditorDialogComponent, {
-            data: { event: target, calendars: this.calendars, settings: this.settings, is_new: false }
+            data: { event: target, calendars: this.calendars, settings: this.calendarservice.settings, is_new: false }
         });
         dialogRef.afterClosed().subscribe(result => {
             if (result === 'DELETE') {
@@ -282,9 +276,9 @@ export class CalendarAppComponent implements OnDestroy {
     }
 
     openSettings(): void {
-        const dialogRef = this.dialog.open(CalendarSettingsDialogComponent, { data: this.settings });
+        const dialogRef = this.dialog.open(CalendarSettingsDialogComponent, { data: this.calendarservice.settings });
         dialogRef.afterClosed().subscribe(result => {
-            localStorage.setItem('calendarSettings', JSON.stringify(this.settings));
+            this.calendarservice.settings.save();
             // we need to do this weird dance to make the calendar pick up
             // potential changes to settings.weekStartsOnSunday
             const desiredView = this.view;
@@ -323,9 +317,9 @@ export class CalendarAppComponent implements OnDestroy {
 
     setView(view: RunboxCalendarView): void {
         this.view = view;
-        this.settings.lastUsedView = this.view;
-        localStorage.setItem('calendarSettings', JSON.stringify(this.settings));
-
+        this.calendarservice.settings.lastUsedView = this.view;
+        this.calendarservice.settings.save();
+        
         switch (this.view) {
             case RunboxCalendarView.Overview: {
                 this.mwlView = null;
