@@ -11,20 +11,44 @@
                 <mat-form-field>
                     <mat-label>First name</mat-label>
                     <input type="text" matInput formControlName="first_name">
+                    <div *ngIf="field_errors && field_errors['first_name']">
+                      <mat-hint> ie. Fred </mat-hint>
+                      <mat-error *ngFor="let error of field_errors['first_name']">
+                        {{error}}
+                      </mat-error>
+                    </div>
                 </mat-form-field>
                 <mat-form-field>
                     <mat-label>Last name</mat-label>
                     <input type="text" matInput formControlName="last_name">
+                    <div *ngIf="field_errors && field_errors['last_name']">
+                      <mat-hint> ie. Bloggs </mat-hint>
+                      <mat-error *ngFor="let error of field_errors['last_name']">
+                        {{error}}
+                      </mat-error>
+                    </div>
                 </mat-form-field>
             </div>
             <div class="form-container form-contact">
                 <mat-form-field>
                     <mat-label>Alternative email address</mat-label>
                     <input type="email" matInput formControlName="email_alternative">
+                    <div *ngIf="field_errors && field_errors['email_alternative']">
+                      <mat-hint> ie. fred@bloggs.com </mat-hint>
+                      <mat-error *ngFor="let error of field_errors['email_alternative']">
+                        {{error}}
+                      </mat-error>
+                    </div>
                 </mat-form-field>
                 <mat-form-field>
                     <mat-label>Phone number (optional)</mat-label>
                     <input type="tel" matInput formControlName="phone_number">
+                    <div *ngIf="field_errors && field_errors['phone_number']">
+                      <mat-hint> ie. +44 1235 123456 </mat-hint>
+                      <mat-error *ngFor="let error of field_errors['phone_number']">
+                        {{error}}
+                      </mat-error>
+                    </div>
                 </mat-form-field>
             </div>
             <h3><strong>Company information</strong></h3>
@@ -32,29 +56,65 @@
                 <mat-form-field>
                     <mat-label>Company (optional)</mat-label>
                     <input type="text" matInput formControlName="company">
+                    <div *ngIf="field_errors && field_errors['company']">
+                      <mat-hint> ie. My Org </mat-hint>
+                      <mat-error *ngFor="let error of field_errors['company']">
+                        {{error}}
+                      </mat-error>
+                    </div>
                 </mat-form-field>
                 <mat-form-field>
                     <mat-label>Organization number (optional)</mat-label>
                     <input type="text" matInput formControlName="org_number">
+                    <div *ngIf="field_errors && field_errors['org_number']">
+                      <mat-hint> ie. 12345 </mat-hint>
+                      <mat-error *ngFor="let error of field_errors['org_number']">
+                        {{error}}
+                      </mat-error>
+                    </div>
                 </mat-form-field>
                 <mat-form-field>
                     <mat-label>VAT number (optional)</mat-label>
                     <input type="text" matInput matInput formControlName="vat_number">
+                    <div *ngIf="field_errors && field_errors['vat_number']">
+                      <mat-hint> ie. 12345 </mat-hint>
+                      <mat-error *ngFor="let error of field_errors['vat_number']">
+                        {{error}}
+                      </mat-error>
+                    </div>
                 </mat-form-field>
             </div>
-            <h3><strong>Address details</strong></h3>
+            <h3 id="address-details"><strong>Address details</strong></h3>
             <div class="form-container form-address">
                 <mat-form-field>
                     <mat-label>Address</mat-label>
                     <input type="text" matInput formControlName="street_address">
+                    <div *ngIf="field_errors && field_errors['street_address']">
+                      <mat-hint> ie. 123 This Street </mat-hint>
+                      <mat-error *ngFor="let error of field_errors['street_address']">
+                        {{error}}
+                      </mat-error>
+                    </div>
                 </mat-form-field>
                 <mat-form-field>
                     <mat-label>City</mat-label>
                     <input type="text" matInput formControlName="city">
+                    <div *ngIf="field_errors && field_errors['city']">
+                      <mat-hint> ie. London </mat-hint>
+                      <mat-error *ngFor="let error of field_errors['city']">
+                        {{error}}
+                      </mat-error>
+                    </div>
                 </mat-form-field>
                 <mat-form-field>
                     <mat-label>Postal/Zip code</mat-label>
                     <input type="text" matInput formControlName="postal_code">
+                    <div *ngIf="field_errors && field_errors['postal_code']">
+                      <mat-hint> ie. 12345 </mat-hint>
+                      <mat-error *ngFor="let error of field_errors['postal_code']">
+                        {{error}}
+                      </mat-error>
+                    </div>
                 </mat-form-field>
                 <mat-form-field>
                     <mat-label>Country</mat-label>
@@ -63,6 +123,12 @@
                             {{ country.name }}
                         </mat-option>
                     </mat-select>
+                    <div *ngIf="field_errors && field_errors['country']">
+                      <mat-hint> ie. Norway </mat-hint>
+                      <mat-error *ngFor="let error of field_errors['country']">
+                        {{error}}
+                      </mat-error>
+                    </div>
                 </mat-form-field>
                 <mat-form-field>
                     <mat-label>Time zone</mat-label>
@@ -71,6 +137,12 @@
                             {{ timezone }}
                         </mat-option>
                     </mat-select>
+                    <div *ngIf="field_errors && field_errors['timezone']">
+                      <mat-hint> ie. Europe/Oslo </mat-hint>
+                      <mat-error *ngFor="let error of field_errors['timezone']">
+                        {{error}}
+                      </mat-error>
+                    </div>
                 </mat-form-field>
             </div>
             <div class="action-buttons">

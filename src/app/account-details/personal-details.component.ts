@@ -17,7 +17,6 @@
 // along with Runbox 7. If not, see <https://www.gnu.org/licenses/>.
 // ---------- END RUNBOX LICENSE ----------
 
-import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -26,6 +25,8 @@ import { RMM } from '../rmm';
 import { map } from 'rxjs/operators';
 import { AccountDetailsInterface } from '../rmm/account-details';
 import { ModalPasswordComponent } from '../account-security/account.security.component';
+import { RunboxWebmailAPI } from '../rmmapi/rbwebmail';
+
 import * as ct from 'countries-and-timezones';
 
 interface CountryAndTimezone {
@@ -52,11 +53,13 @@ export class PersonalDetailsComponent {
     selectedCountry: any;
     selectedTimezone: any;
 
+    field_errors = [];
+
     constructor(
         private fb: FormBuilder,
-        private http: HttpClient,
         public dialog: MatDialog,
         public rmm: RMM,
+        public rmmapi: RunboxWebmailAPI,
     ) {
         this.details.subscribe((details: AccountDetailsInterface) => {
             this.detailsForm.patchValue(details);
@@ -64,7 +67,6 @@ export class PersonalDetailsComponent {
 
         this.loadDetails();
         this.loadCountryList();
-        this.loadSelectFields();
         this.loadTimezones();
     }
 
@@ -92,44 +94,33 @@ export class PersonalDetailsComponent {
     }
 
     loadCountryList() {
-        for (const country in ct.getAllCountries()) {
-            if (country) {
-                const ctObject = {
-                    id: country,
-                    name: ct.getAllCountries()[country].name,
-                    timezones: ct.getAllCountries()[country].timezones,
-                };
-                this.countriesAndTimezones.push(ctObject);
-            }
+        const allCountries = ct.getAllCountries();
+        for (const country of Object.keys(allCountries)) {
+            this.countriesAndTimezones.push(allCountries[country]);
         }
+        this.countriesAndTimezones.sort((cA, cB) => {
+            if (cA['name'] < cB['name']) {
+                return -1;
+            }
+            if (cA['name'] > cB['name']) {
+                return 1;
+            }
+            return 0;
+        });
     }
 
     loadTimezones() {
-        this.http
-            .get('/rest/v1/timezones')
-            .pipe(map((res: HttpResponse<any>) => res['result']))
-            .toPromise()
-            .then((data) => this.timezones = data.timezones);
+        this.rmmapi.getTimezoneList().subscribe((res) => 
+            this.timezones = res
+        );
     }
 
     private loadDetails() {
-        this.http
-            .get('/rest/v1/account/details')
-            .pipe(map((res: HttpResponse<any>) => res['result']))
-            .subscribe((details) => {
-                this.details.next(details);
-            });
-    }
-
-    private loadSelectFields() {
-        this.http
-            .get('/rest/v1/account/details')
-            .pipe(map((res: HttpResponse<any>) => res['result']))
-            .toPromise()
-            .then((data) => {
-                this.selectedCountry = data.country;
-                this.selectedTimezone = data.timezone;
-            });
+        this.rmmapi.getPersonalDetails().subscribe((res) => {
+            this.selectedCountry = res['country'];
+            this.selectedTimezone = res['timezone'];
+            this.details.next(res as AccountDetailsInterface);
+        });
     }
 
     public update() {
@@ -148,20 +139,28 @@ export class PersonalDetailsComponent {
                 updates[name] = ctl.value;
             } else if (name === 'timezone') {
                 updates[name] = this.selectedTimezone;
-            } else if (name === 'country') {
+            } else if (name === 'country' && this.selectedCountry.length > 0) {
                 updates[name] = this.selectedCountry;
             }
         }
         updates['password'] = this.rmm.account_security.user_password;
 
-        this.http
-            .post('/rest/v1/account/details', updates)
-            .pipe(map((res: HttpResponse<any>) => res['result']))
-            .subscribe((details) => {
-                this.details.next(details);
-            });
+        this.rmmapi.setPersonalDetails(updates)
+            .subscribe(
+                (res: any) => {
+                    if (res['status'] === 'error') {
+                        this.field_errors = res['field_errors'];
+                        this.rmm.show_error('Account details update failed', 'Dismiss');
+                    } else {
+                        this.rmm.show_error('Account details updated', 'Dismiss');
+                        this.details.next(res as AccountDetailsInterface);
+                        this.rmmapi.loadMe();
+                    }
+            },
+                err => console.log('Error saving personal details')
+            );
 
-        this.rmm.show_error('Account details updated', 'Dismiss');
+
     }
 
     show_modal_password() {

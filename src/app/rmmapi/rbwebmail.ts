@@ -194,7 +194,11 @@ export class RunboxWebmailAPI {
         private snackBar: MatSnackBar,
         public rmm: RMM,
     ) {
+        this.loadMe();
         this.rblocale = new RunboxLocale();
+    }
+
+    public loadMe() {
         this.http.get('/rest/v1/me')
             .pipe(
                 map((res: any) => res.result),
@@ -862,5 +866,25 @@ export class RunboxWebmailAPI {
         return this.http.post('/rest/v1/webmail/saved_searches', savedSearches).pipe(
             map((res: HttpResponse<any>) => res['result'])
         );
+    }
+
+    getTimezoneList() {
+        return this.http.get('/rest/v1/timezones').pipe(
+            map((res: HttpResponse<any>) => res['result']['timezones'])
+        );
+    }
+
+    // Account Personal Details
+    getPersonalDetails() {
+        return this.http.get('/rest/v1/account/details').pipe(
+            map((res: HttpResponse<any>) => res['result'])
+        );
+    }
+
+    setPersonalDetails(updates) {
+        return this.http
+            .post('/rest/v1/account/details', updates);
+            // .pipe(
+            //     map((res: HttpResponse<any>) => res));
     }
 }
