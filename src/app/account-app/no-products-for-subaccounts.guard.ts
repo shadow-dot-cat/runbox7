@@ -19,7 +19,7 @@
 
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, CanActivateChild, CanActivate, Router } from '@angular/router';
-import { AsyncSubject, Observable } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import { RunboxMe, RunboxWebmailAPI } from '../rmmapi/rbwebmail';
 
 import { AccountRenewalsComponent } from './account-renewals.component';
@@ -38,7 +38,7 @@ export class NoProductsForSubaccountsGuard implements CanActivate, CanActivateCh
         CreditCardsComponent,
     ];
 
-    me: AsyncSubject<RunboxMe>;
+    me: Subject<RunboxMe>;
 
     constructor(
         rmmapi: RunboxWebmailAPI,

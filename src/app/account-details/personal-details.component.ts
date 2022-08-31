@@ -22,7 +22,6 @@ import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Subject } from 'rxjs';
 import { RMM } from '../rmm';
-import { map } from 'rxjs/operators';
 import { AccountDetailsInterface } from '../rmm/account-details';
 import { ModalPasswordComponent } from '../account-security/account.security.component';
 import { RunboxWebmailAPI } from '../rmmapi/rbwebmail';
@@ -110,7 +109,7 @@ export class PersonalDetailsComponent {
     }
 
     loadTimezones() {
-        this.rmmapi.getTimezoneList().subscribe((res) => 
+        this.rmmapi.getTimezoneList().subscribe((res) =>
             this.timezones = res
         );
     }

@@ -22,6 +22,7 @@ import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     OnDestroy,
+    OnInit,
     ViewChild,
 } from '@angular/core';
 
@@ -72,7 +73,7 @@ import '../sentry';
     ],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CalendarAppComponent implements OnDestroy {
+export class CalendarAppComponent implements OnDestroy, OnInit {
     mwlView = CalendarView.Month;
     view: RunboxCalendarView = RunboxCalendarView.Month;
     // needed so that angular templates know what this name means
@@ -130,12 +131,6 @@ export class CalendarAppComponent implements OnDestroy {
                 this.router.navigate(['/calendar'], { queryParams: {}, replaceUrl: true });
             });
         });
-        this.calendarservice.eventSubject.subscribe(events => {
-            this.events = events;
-            this.updateEventColors();
-            this.filterEvents();
-        });
-
         // force re-render to update the last update string
         this.viewRefreshInterval = setInterval(() => {
             this.cdr.markForCheck();
@@ -151,6 +146,14 @@ export class CalendarAppComponent implements OnDestroy {
 
     ngOnDestroy() {
         clearInterval(this.viewRefreshInterval);
+    }
+
+    ngOnInit(): void {
+        this.calendarservice.eventSubject.subscribe(events => {
+            this.events = events;
+            this.updateEventColors();
+            this.filterEvents();
+        });
     }
 
     addEvent(on?: Date): void {
@@ -319,7 +322,7 @@ export class CalendarAppComponent implements OnDestroy {
         this.view = view;
         this.calendarservice.settings.lastUsedView = this.view;
         this.calendarservice.settings.save();
-        
+
         switch (this.view) {
             case RunboxCalendarView.Overview: {
                 this.mwlView = null;

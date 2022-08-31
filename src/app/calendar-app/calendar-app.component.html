@@ -93,7 +93,7 @@
 
 <ng-template #calendarTitle>
     <span class="calendarTitle">
-        {{ mwlView ? (viewDate | calendarDate:(mwlView + 'ViewTitle'):'en') : 'Overview' }}
+        {{ mwlView ? (viewDate | calendarDate:(mwlView + 'ViewTitle'):'en') : 'Overview' }} (<a routerLink="../account/details" fragment="address-details">{{ calendarservice.me.timezone }}</a>)
     </span>
 </ng-template>
 

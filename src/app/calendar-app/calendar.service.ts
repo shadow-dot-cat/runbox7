@@ -27,7 +27,7 @@ import { ViewPeriod } from 'calendar-utils';
 
 import { Injectable, OnDestroy } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Observable, Subject, ReplaySubject, AsyncSubject } from 'rxjs';
+import { Observable, Subject, ReplaySubject } from 'rxjs';
 
 import moment from 'moment';
 import ICAL from 'ical.js';
@@ -64,9 +64,10 @@ export class CalendarService implements OnDestroy {
     activities      = new BackgroundActivityService<Activity>();
 
     me: RunboxMe    = new RunboxMe();
+    timezone        = '';
     settings        = new CalendarSettings();
 
-    userTimezoneLoaded = new AsyncSubject<ICAL.Timezone>();
+    userTimezoneLoaded = new ReplaySubject<ICAL.Timezone>();
 
     constructor(
         private rmmapi:  RunboxWebmailAPI,
@@ -82,8 +83,7 @@ export class CalendarService implements OnDestroy {
 
         // We need the user's timezone to display their events:
         this.userTimezoneLoaded.subscribe((tzone) => {
-            // Is this clever.. ?
-            this.me.timezone = tzone.tzid;
+            this.timezone = tzone.tzid;
             storage.get('caldavCache').then(cache => {
                 if (!cache) {
                     return;
@@ -380,7 +380,7 @@ export class CalendarService implements OnDestroy {
                 if (!startDate ||
                     (moment(startDate).isSameOrBefore(icalevent.endDate.toJSDate())
                         && moment(endDate).isSameOrAfter(icalevent.startDate.toJSDate()) )) {
-                    events.push(new RunboxCalendarEvent(id, icalevent, icalevent.startDate, icalevent.endDate, this.me.timezone));
+                    events.push(new RunboxCalendarEvent(id, icalevent, icalevent.startDate, icalevent.endDate, this.timezone));
                 }
                 return;
             }
@@ -421,7 +421,7 @@ export class CalendarService implements OnDestroy {
                 && (end_date_Moment ? end_date_Moment.isAfter(next_time.toJSDate()) : true) ) {
                 const details = icalevent.getOccurrenceDetails(next_time);
                 events.push(
-                    new RunboxCalendarEvent(id, details.item, details.startDate, details.endDate, this.me.timezone));
+                    new RunboxCalendarEvent(id, details.item, details.startDate, details.endDate, this.timezone));
             }
         });
         return events;
@@ -479,6 +479,7 @@ export class CalendarService implements OnDestroy {
             // This debug makes tests quite noisy!
             // console.log('Found timezone data:', tzData);
             // VCALENDAR with VTIMEZONE in it
+            // console.log('loading vtimezone');
             const component = new ICAL.Component(ICAL.parse(tzData));
             let tz;
             if (component.getFirstSubcomponent('vtimezone')) {
@@ -490,13 +491,13 @@ export class CalendarService implements OnDestroy {
                         tzid:      tzComponent.getFirstPropertyValue('tzid'),
                         component: tzComponent,
                     });
+                    // console.log('Got tz : ' + tz);
                     if (!ICAL.TimezoneService.has(tz.tzid)) {
                         ICAL.TimezoneService.register(tz.tzid, tz);
                     }
                 }
             }
             this.userTimezoneLoaded.next(tz);
-            this.userTimezoneLoaded.complete();
         });
     }
 

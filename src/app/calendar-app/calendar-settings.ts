@@ -22,7 +22,6 @@ import { RunboxCalendarView } from './runbox-calendar-view';
 export class CalendarSettings {
     weekStartsOnSunday = false;
     lastUsedView: RunboxCalendarView = RunboxCalendarView.Month;
-    displayTimezone: string;
 
     load() {
         const props = JSON.parse(localStorage.getItem('calendarSettings'));
@@ -32,9 +31,6 @@ export class CalendarSettings {
             }
             if ('lastUsedView' in props) {
                 this.lastUsedView = props['lastUsedView'];
-            }
-            if ('displayTimezone' in props) {
-                this.displayTimezone = props['displayTimezone'];
             }
         }
     }

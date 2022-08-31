@@ -18,7 +18,7 @@
 // ---------- END RUNBOX LICENSE ----------
 
 import { Injectable, NgZone } from '@angular/core';
-import { Observable, from, Subject, AsyncSubject } from 'rxjs';
+import { Observable, from, Subject } from 'rxjs';
 import { share } from 'rxjs/operators';
 import { MessageInfo } from '../common/messageinfo';
 import { MailAddressInfo } from '../common/mailaddressinfo';
@@ -180,7 +180,7 @@ export class RunboxWebmailAPI {
     public static readonly LIST_ALL_MESSAGES_CHUNK_SIZE: number = 10000;
 
     public messageFlagChangeSubject: Subject<MessageFlagChange> = new Subject();
-    public me: AsyncSubject<RunboxMe> = new AsyncSubject();
+    public me: Subject<RunboxMe> = new Subject();
     public rblocale: any;
 
     public last_on_interval;
@@ -209,7 +209,6 @@ export class RunboxWebmailAPI {
                 })
             ).subscribe((me: RunboxMe) => {
                 this.me.next(me);
-                this.me.complete();
 
                 this.ngZone.runOutsideAngular(() =>
                     this.last_on_interval = setInterval(() => this.ngZone.run(() => {

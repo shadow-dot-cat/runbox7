@@ -34,11 +34,9 @@ import { CalendarService } from './calendar.service';
         </mat-checkbox>
     </p>
     <mat-divider></mat-divider>
-    <p>
         <button mat-raised-button (click)="removeCache()">
             Remove calendar cache
         </button>
-    </p>
     <p>
         Try this if your events or calendars are not getting displayed.
     </p>
@@ -59,7 +57,7 @@ export class CalendarSettingsDialogComponent {
         public dialogRef: MatDialogRef<CalendarSettingsDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public data: CalendarSettings
     ) {
-        this.settings = data;
+        this.settings = this.calendarservice.settings;
     }
 
     removeCache() {

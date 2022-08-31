@@ -203,7 +203,7 @@ END:VCALENDAR
 
     it('should display calendars', () => {
         expect(component).toBeTruthy();
-        component.calendarservice.syncCaldav();
+        component.calendarservice.userTimezoneLoaded.subscribe(() => component.calendarservice.syncCaldav());
         fixture.detectChanges();
 
         expect(component.calendars[0]).toBeDefined();
@@ -218,7 +218,7 @@ END:VCALENDAR
 
     it('should display events', () => {
         mockData['events'] = simpleEvents;
-        component.calendarservice.syncCaldav(true);
+        component.calendarservice.userTimezoneLoaded.subscribe(() => component.calendarservice.syncCaldav(true));
         fixture.detectChanges();
 
         // if we run this at the end of the month, it might be 1, else
@@ -236,7 +236,7 @@ END:VCALENDAR
 
     it('should be possible to hide calendars', () => {
         mockData['events'] = simpleEvents;
-        component.calendarservice.syncCaldav(true);
+        component.calendarservice.userTimezoneLoaded.subscribe(() => component.calendarservice.syncCaldav(true));
         fixture.detectChanges();
 
         let events = fixture.debugElement.nativeElement.querySelectorAll('button.calendarMonthDayEvent');
@@ -255,7 +255,7 @@ END:VCALENDAR
 
     it('should display recurring events', () => {
         mockData['events'] = recurringEvents;
-        component.calendarservice.syncCaldav(true);
+        component.calendarservice.userTimezoneLoaded.subscribe(() => component.calendarservice.syncCaldav(true));
 
         fixture.detectChanges();
 
@@ -271,7 +271,7 @@ END:VCALENDAR
 
     it('should not display yearly events as longer than they are (GH-179)', () => {
         mockData['events'] = GH_179_recurring_yearly;
-        component.calendarservice.syncCaldav(true);
+        component.calendarservice.userTimezoneLoaded.subscribe(() => component.calendarservice.syncCaldav(true));
         fixture.detectChanges();
 
         const events = fixture.debugElement.nativeElement.querySelectorAll('button.calendarMonthDayEvent');

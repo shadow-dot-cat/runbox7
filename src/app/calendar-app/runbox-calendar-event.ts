@@ -148,8 +148,10 @@ export class RunboxCalendarEvent implements CalendarEvent {
             // console.log('offset: ' + user_dtstart.zone.utcOffset(user_dtstart));
             // console.log('start: convert to  : ' + this.timezone);
             // console.log('have timezone? : ' + ICAL.TimezoneService.has(this.timezone));
-            // console.log('offset: ' + ICAL.TimezoneService.get(this.timezone).utcOffset(user_dtstart));
-            user_dtstart = this._dtstart.convertToZone(ICAL.TimezoneService.get(this.timezone));
+            if (ICAL.TimezoneService.has(this.timezone)) {
+                // console.log('offset: ' + ICAL.TimezoneService.get(this.timezone).utcOffset(user_dtstart));
+                user_dtstart = this._dtstart.convertToZone(ICAL.TimezoneService.get(this.timezone));
+            }
         }
 
         return new Date(user_dtstart.toString());
@@ -167,7 +169,7 @@ export class RunboxCalendarEvent implements CalendarEvent {
         } else {
             shownEnd.addDuration(new ICAL.Duration({'isNegative': true, 'seconds': 1}));
         }
-        if (shownEnd.zone) {
+        if (shownEnd.zone && ICAL.TimezoneService.has(this.timezone)) {
             shownEnd = shownEnd.convertToZone(ICAL.TimezoneService.get(this.timezone));
         }
 
