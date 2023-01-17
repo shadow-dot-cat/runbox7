@@ -68,15 +68,6 @@ describe('ProgressService', () => {
             take(1)
         ).subscribe(() => httpProgressSeen = true);
 
-        const req = httpMock.expectOne(`/rest/v1/me`);
-
-        req.flush({
-            'result': {'uid': '11', 'last_name': 'testuser'},
-            'status': 'success'}, {status: 200, statusText: 'OK'});
-
-        const last_on_req = httpMock.expectOne(`/rest/v1/last_on`);
-        last_on_req.flush(200);
-
         const me = await rmmapiservice.me.toPromise();
         expect(me.last_name).toBe('testuser');
 

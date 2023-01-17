@@ -17,7 +17,7 @@
 // along with Runbox 7. If not, see <https://www.gnu.org/licenses/>.
 // ---------- END RUNBOX LICENSE ----------
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { HttpClient } from '@angular/common/http';
@@ -49,9 +49,9 @@ export class LoginComponent implements OnInit {
     constructor(private httpclient: HttpClient,
         private router: Router,
         private authservice: RMMAuthGuardService,
+        private ngZone: NgZone,
         public progressService: ProgressService
     ) {
-
     }
 
     ngOnInit() {
@@ -164,7 +164,16 @@ export class LoginComponent implements OnInit {
                 window.location.href = '/mail';
                 return;
             }
-            this.router.navigateByUrl(this.authservice.urlBeforeLogin);
+
+          this.ngZone.run(() => {
+            this.router.navigateByUrl(this.authservice.urlBeforeLogin, { replaceUrl: true })
+              .then((result) => {
+                if (!result) {
+                  this.router.navigateByUrl('/', { replaceUrl: true });
+                }
+              })
+              .catch((e) => console.log('Navigate error:' + e));
+          });
         }
     }
 

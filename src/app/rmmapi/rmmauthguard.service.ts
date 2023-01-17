@@ -19,39 +19,43 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router, CanActivateChild } from '@angular/router';
+import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router, CanActivateChild, UrlTree } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
+import { RunboxWebmailAPI } from '../rmmapi/rbwebmail';
 
 @Injectable()
 export class RMMAuthGuardService implements CanActivate, CanActivateChild {
 
     urlBeforeLogin = '';
     wasLoggedIn = false;
+    me;
 
     constructor(
         public http: HttpClient,
-        public router: Router
+        public router: Router,
+        private rmmapi: RunboxWebmailAPI,
     ) {
 
     }
 
-    checkLogin(): Promise<boolean> {
-        return new Promise<boolean>((resolve, _reject) => {
+    checkLogin(): Promise<boolean | UrlTree> {
+        return new Promise<boolean | UrlTree>((resolve, _reject) => {
             this.isLoggedIn().pipe(take(1)).subscribe(
                 success => {
                     if (!success) {
-                        this.redirectToLogin();
+                      resolve(this.router.parseUrl('/login'));
+                    } else {
+                      resolve(success);
                     }
-                    resolve(success);
                 },
                 error => {
                     if (error.status === 403) {
-                        resolve(false);
+                      resolve(false);
                     } else {
                         // No indication that the user is unauthorized.
                         // Let them in, and have the httpinterceptor figure out what to do.
-                        resolve(true);
+                      resolve(true);
                     }
                 }
             );
@@ -61,13 +65,19 @@ export class RMMAuthGuardService implements CanActivate, CanActivateChild {
     isLoggedIn(): Observable<boolean> {
         return this.http.get('/rest/v1/me').pipe(
             map((res: any) => {
-                this.wasLoggedIn = res && res.status === 'success';
+                if (res && res.status === 'success') {
+                    this.wasLoggedIn = true;
+                    const me = res.result;
+                    this.rmmapi.setRunboxMe(me);
+                }
                 return this.wasLoggedIn;
             }),
         );
     }
 
-    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | Observable<boolean> | Promise<boolean> {
+    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean  | UrlTree |
+        Observable<boolean | UrlTree> |
+        Promise<boolean | UrlTree> {
         this.urlBeforeLogin = state.url;
 
         // Asynchronously check in whether the user is logged in or not
@@ -80,7 +90,7 @@ export class RMMAuthGuardService implements CanActivate, CanActivateChild {
         // the async login check will still continue in the background
         // and kick the user out in case we were wrong.
         if (this.wasLoggedIn) {
-            return true;
+          return true;
         }
 
         // If the user was not logged in last time we checked,
@@ -88,7 +98,9 @@ export class RMMAuthGuardService implements CanActivate, CanActivateChild {
         return loginCheck;
     }
 
-    canActivateChild(childRoute: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | Observable<boolean> | Promise<boolean> {
+    canActivateChild(childRoute: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree |
+        Observable<boolean | UrlTree> |
+        Promise<boolean | UrlTree> {
         return this.canActivate(childRoute, state);
     }
 
@@ -97,6 +109,9 @@ export class RMMAuthGuardService implements CanActivate, CanActivateChild {
             this.urlBeforeLogin = '/';
         }
         console.log('Will navigate back to ', this.urlBeforeLogin);
-        this.router.navigate(['login']);
+        if (this.wasLoggedIn) {
+            // We were attempting to load rest/v1/me 
+            this.router.navigate(['login']);
+        }
     }
 }

@@ -125,15 +125,8 @@ describe('SearchService', () => {
         const searchService = TestBed.inject(SearchService);
         await xapianLoadedSubject.toPromise();
 
-        let req = httpMock.expectOne(`/rest/v1/me`);
-        req.flush( { result: {
-                uid: 555
-            } as RunboxMe
-        });
-        req = httpMock.expectOne('/rest/v1/email_folder/list');
+        const req = httpMock.expectOne('/rest/v1/email_folder/list');
         req.flush(listEmailFoldersResponse);
-        req = httpMock.expectOne('/rest/v1/last_on');
-        req.flush({'status': 'success'});
 
         expect(await searchService.initSubject.toPromise()).toBeFalsy();
         expect(searchService.localSearchActivated).toBeFalsy();

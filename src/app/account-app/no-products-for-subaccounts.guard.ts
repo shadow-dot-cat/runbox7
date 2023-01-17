@@ -19,13 +19,15 @@
 
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, CanActivateChild, CanActivate, Router } from '@angular/router';
-import { AsyncSubject, Observable } from 'rxjs';
-import { RunboxMe, RunboxWebmailAPI } from '../rmmapi/rbwebmail';
+import { Observable } from 'rxjs';
+import { RunboxWebmailAPI } from '../rmmapi/rbwebmail';
 
 import { AccountRenewalsComponent } from './account-renewals.component';
 import { AccountTransactionsComponent } from './account-transactions.component';
 import { AccountUpgradesComponent } from './account-upgrades.component';
 import { CreditCardsComponent } from './credit-cards/credit-cards.component';
+
+import { RMMAuthGuardService } from '../rmmapi/rmmauthguard.service';
 
 @Injectable({
     providedIn: 'root'
@@ -38,30 +40,34 @@ export class NoProductsForSubaccountsGuard implements CanActivate, CanActivateCh
         CreditCardsComponent,
     ];
 
-    me: AsyncSubject<RunboxMe>;
-
     constructor(
-        rmmapi: RunboxWebmailAPI,
+        private rmmapi: RunboxWebmailAPI,
+        private authGuard: RMMAuthGuardService,
         private router: Router,
     ) {
-        this.me = rmmapi.me;
     }
 
     canActivate(
         route: ActivatedRouteSnapshot, _state: RouterStateSnapshot
     ): boolean | UrlTree | Observable<boolean | UrlTree> | Promise<boolean | UrlTree> {
-        const restricted = this.banned_components.find(c => route.component === c);
-        if (restricted) {
-            return this.me.toPromise().then(me => {
-                if (me.owner) {
-                    return this.router.parseUrl('/account/not-for-subaccounts');
-                } else {
-                    return true;
+        return this.authGuard.checkLogin().then(
+            (success) => {
+                if (typeof(success) === 'boolean' && success) {
+                    const restricted = this.banned_components.find(c => route.component === c);
+                    if (restricted) {
+                        return this.rmmapi.me.toPromise().then(me => {
+                            if (me.owner) {
+                                return this.router.parseUrl('/account/not-for-subaccounts');
+                            } else {
+                                return true;
+                            }
+                        });
+                    } else {
+                        return true;
+                    }
                 }
-            });
-        } else {
-            return true;
-        }
+            }
+        );
     }
 
     canActivateChild(
