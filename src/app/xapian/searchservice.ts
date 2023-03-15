@@ -240,8 +240,8 @@ export class SearchService {
     this.indexReloadedSubject.subscribe(() => {
       // console.log('searchservice updating folderCounts');
       // we're sending both "indexUpdated", and "updateMessageListService"
-      this.messagelistservice.refreshFolderCounts();
-      // this.messagelistservice.refreshFolderList();
+      //this.messagelistservice.refreshFolderCounts();
+      //this.messagelistservice.refreshFolderList();
     });
 
      this.messagelistservice.folderListSubject

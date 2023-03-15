@@ -714,7 +714,7 @@ not matching with rest api counts for current folder`);
         }
       }
 
-      console.log(`Updating messageListService with # mesgs: ${msginfos.length}, new sync: ${this.numberOfMessagesSyncedLastTime}`);
+      console.log(`Worker: Updating messageListService with # mesgs: ${msginfos.length}, new sync: ${this.numberOfMessagesSyncedLastTime}`);
       if ((msginfos && msginfos.length > 0)
         || (deletedMessages && deletedMessages.length > 0)) {
         if (this.numberOfMessagesSyncedLastTime) {

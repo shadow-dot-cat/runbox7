@@ -306,11 +306,27 @@ export class MessageListService {
         // Just lie a bit, we'll fix it in a mo..
         this.folderMessageCountSubject.next(this.folderCounts);
         this.folderMessageLists[this.trashFolderName] = [];
+        // In case it was the current Folder:
+
+        this.messagesInViewSubject.next(this.folderMessageLists[this.currentFolder]);
+    }
+
+    // We need a local way to update counts that changes whats in the
+    // folderListsubject, for that we're going to need to get passed
+    // in the folder each msg is in, as well as the target folder
+    // can't look it up in messagesById as that's only guaranteed when
+    // sync is off.
+    // Can't use currentFolder cos it could be a search result!
+    // Either messagedisplay selectedMessageIds needs some magic to return
+    // the msg folder as well or, we maintain messagesById (again)
+    public updateLocalCounts() {
     }
 
     // almost duplicate of code in applyChanges, except for hasChanges!?
     // Permanent delete
     public deleteTrashMessages(messageIds: number[]) {
+        const folders = this.folderListSubject.value;
+        const tFolderIndex = folders.findIndex((f) => f.folderName === this.trashFolderName);
         messageIds.forEach((msgId) => {
             const msg = this.messagesById[msgId];
             if (msg && this.folderMessageLists[msg.folder]) {
@@ -320,93 +336,114 @@ export class MessageListService {
                     this.folderMessageLists[msg.folder]
                         .splice(delFolderMessageIndex, 1);
                 }
-                this.folderCounts[this.trashFolderName].total++;
+                folders[tFolderIndex].totalMessages--;
                 if (!msg.seenFlag) {
-                    this.folderCounts[this.trashFolderName].unread++;
+                    folders[tFolderIndex].newMessages--;
                 }
                 delete this.messagesById[msgId];
             }
         });
         // Message counts update
-        this.folderMessageCountSubject.next(this.folderCounts);
+        this.folderListSubject.next(folders);
+        this.refreshFolderCounts();
+        // this.folderMessageCountSubject.next(this.folderCounts);
         // current folder contents update
         this.messagesInViewSubject.next(this.folderMessageLists[this.currentFolder]);
     }
 
     // Non-index users (or trash/spam) - move to other folder
+    // Using / updating folderListSubject here doesnt DWIM because:
+    // the subscribe to it above that uses distinctuntilchanged, thinks
+    // it hasnt changed! aka prev value totalMessages is the same as curr
+    // meanwhile the counts display is completely incorrect!
     public moveMessages(messageIds: number[], folderName: string, decache: boolean = false) {
-        messageIds.forEach((msgId) => {
-            const msg = this.messagesById[msgId];
-            if (!msg) {
-                // we only have T/S messages now, so if index on
-                // might not have this one
-                // artificial count update
-                if (folderName === this.spamFolderName || folderName === this.trashFolderName) {
-                    this.folderCounts[folderName].total++;
+        // arrayref of FolderListEntrys
+        const folders = this.folderListSubject.value;
+        const toFolderIndex = folders.findIndex((f) => f.folderName === folderName);
+        if (toFolderIndex == -1) {
+            console.error(`moveMessages: Missing folderSubject: {folderName}`);
+            // folders[toFolderIndex] = new FolderListEntry(0,0)
+        }
+        // Local search yes/no? (NB local = sync on)
+        this.searchservice.pipe(take(1)).subscribe(searchservice => {
+            messageIds.forEach((msgId) => {
+                // This is only valid now if sync is off, or we're
+                // moving to/from Trash/Spam
+                const msg = this.messagesById[msgId];
+                if (!msg) {
+                    if (!searchservice.localSearchActivated) {
+                        // we only have T/S messages now, so if index on
+                        // might not have this one
+                        // artificial count update
+                        if (folderName === this.spamFolderName || folderName === this.trashFolderName) {
+                            folders[toFolderIndex].totalMessages++;
+                        }
+                        if (this.currentFolder === this.spamFolderName || this.currentFolder === this.trashFolderName) {
+                            folders[toFolderIndex].totalMessages--;
+                        }
+                    }
+                    return;
                 }
-                if (this.currentFolder === this.spamFolderName || this.currentFolder === this.trashFolderName) {
-                    this.folderCounts[folderName].total--;
+                if (msg.folder === folderName) {
+                    return;
                 }
-                return;
-            }
-            if (msg.folder === folderName) {
-                return;
-            }
-
-            // Default the folderCounts, in case (why?) not set yet
-            if (!this.folderCounts[msg.folder]) {
-                this.folderCounts[msg.folder] = new FolderMessageCountEntry(0, 0);
-                console.error(`moveMessages: Missing folderCounts for {msg.folder}`);
-            }
-            if (!this.folderCounts[folderName]) {
-                this.folderCounts[folderName] = new FolderMessageCountEntry(0, 0);
-                console.error(`moveMessages: Missing folderCounts for {folderName}`);
-            }
-            // Remove from visible emails
-            // If we havent loaded/viewed this folder, we won't have any
-            if (this.folderMessageLists[msg.folder]) {
-                const msgPos = this.folderMessageLists[msg.folder].findIndex((m) => msg.id === m.id);
-                if (msgPos > -1 ) {
-                    this.folderMessageLists[msg.folder]
-                        .splice(msgPos, 1);
+                const fromFolderIndex = folders.findIndex((f) => f.folderName === msg.folder);
+                if (fromFolderIndex == -1) {
+                    console.error(`moveMessages: Missing folderSubject: {msg.folder}`);
+                    // folders[fromFolderIndex] = new FolderListEntry(0,0)
                 }
-            }
-            // Update counts regardless
-            this.folderCounts[msg.folder].total--;
-            if (!msg.seenFlag) {
-                this.folderCounts[msg.folder].unread--;
-            }
 
-            // Not already in target folder so move it there:
-            msg.folder = folderName;
-            // reinsert into trash (assuming we've loaded trash)
-            if (this.folderMessageLists[folderName]) {
-                const msgNewIndex = this.folderMessageLists[folderName].findIndex((m) => msg.id > m.id);
-                if (msgNewIndex > -1) {
-                    this.folderMessageLists[folderName]
-                        .splice(msgNewIndex, 0, msg);
-                } else {
-                    this.folderMessageLists[folderName].push(msg);
+                // Remove from visible emails
+                // If we havent loaded/viewed this folder, we won't have any
+                if (this.folderMessageLists[msg.folder]) {
+                    const msgPos = this.folderMessageLists[msg.folder].findIndex((m) => msg.id === m.id);
+                    if (msgPos > -1 ) {
+                        this.folderMessageLists[msg.folder]
+                            .splice(msgPos, 1);
+                    }
                 }
-            }
+                // Update counts regardless
+                folders[fromFolderIndex].totalMessages--;
+                if (!msg.seenFlag) {
+                    folders[fromFolderIndex].newMessages--;
+                }
 
-            // if requested, remove from cache (eg for enforcing
-            // refresh of emails moved to spam folder, to display the
-            // correct icon
-            if (decache) {
-                this.rmmapi.deleteCachedMessageContents(msgId);
-            }
+                // Not already in target folder so move it there:
+                msg.folder = folderName;
+                // reinsert into trash (assuming we've loaded trash)
+                if (this.folderMessageLists[folderName]) {
+                    const msgNewIndex = this.folderMessageLists[folderName].findIndex((m) => msg.id > m.id);
+                    if (msgNewIndex > -1) {
+                        this.folderMessageLists[folderName]
+                            .splice(msgNewIndex, 0, msg);
+                    } else {
+                        this.folderMessageLists[folderName].push(msg);
+                    }
+                }
 
-            this.folderCounts[folderName].total++;
-            if (!msg.seenFlag) {
-                this.folderCounts[folderName].unread++;
-            }
+                // if requested, remove from cache (eg for enforcing
+                // refresh of emails moved to spam folder, to display the
+                // correct icon
+                if (decache) {
+                    this.rmmapi.deleteCachedMessageContents(msgId);
+                }
+
+                folders[toFolderIndex].totalMessages++;
+                if (!msg.seenFlag) {
+                    folders[toFolderIndex].newMessages++;
+                }
+            });
+
+            // Message counts update
+            console.log('msl moveMessages updating folderCounts');
+            // This SHOULD trigger count updates if necessary
+            // But doesnt!?
+            this.folderListSubject.next(folders);
+            this.refreshFolderCounts();
+
+            // current folder contents update
+            this.messagesInViewSubject.next(this.folderMessageLists[this.currentFolder]);
         });
-      // Message counts update
-      console.log('msl moveMessages updating folderCounts');
-        this.folderMessageCountSubject.next(this.folderCounts);
-        // current folder contents update
-        this.messagesInViewSubject.next(this.folderMessageLists[this.currentFolder]);
     }
 
     public fetchFolderMessages(resetContents = false) {
