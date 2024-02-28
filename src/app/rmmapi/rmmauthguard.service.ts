@@ -72,11 +72,17 @@ export class RMMAuthGuardService implements CanActivate, CanActivateChild {
             map((res: any) => {
                 if (res && res.status === 'success') {
                     this.wasLoggedIn = true;
+                    this.rmmapi.is_logged_in = true;
                     const me = res.result;
                     // ugly? we could subscribe to it..
                     this.currentMe = me;
                     this.rmmapi.setRunboxMe(me);
+                } else {
+                    // trigger logging out!?
+                    this.wasLoggedIn = false;
+                    this.rmmapi.is_logged_in = false;
                 }
+
                 return this.checkStatus();
             }),
         );

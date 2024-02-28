@@ -170,6 +170,7 @@ export class RunboxWebmailAPI {
     public rblocale: any;
 
     public last_on_interval;
+    public is_logged_in = false;
 
     private messageCache: AsyncSubject<MessageCache> = new AsyncSubject();
     private messageContentsRequestCache = new LRUMessageCache<Promise<MessageContents>>();
@@ -199,6 +200,9 @@ export class RunboxWebmailAPI {
             this.ngZone.runOutsideAngular(() =>
                 this.last_on_interval = setInterval(() => this.ngZone.run(() => {
                     this.updateLastOn().subscribe();
+                    if(!this.is_logged_in) {
+                        clearInterval(this.last_on_interval);
+                    }
                 }), 5 * 60 * 1000)
             );
             this.updateLastOn().subscribe();

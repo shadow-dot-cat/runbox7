@@ -92,7 +92,8 @@ export function listAllMessages(
     })
     .catch((error) => {
       console.error(error);
-      return [];
+      throw error;
+      // return [];
     });
 
 }

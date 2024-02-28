@@ -468,6 +468,9 @@ not matching with index for current folder`);
         if (typeof(err) !== 'string' && err.hasOwnProperty('errors')) {
           console.log(err.errors);
         }
+        if (typeof(err) !== 'string' && err.hasOwnProperty('message')) {
+          console.log(err.message);
+        }
       }
 
       if (this.currentIndexUpdateMessageIds.size > 0) {
@@ -516,7 +519,7 @@ not matching with index for current folder`);
 (${stats.total_unseen} vs ${currentFolder.newMessages})
 not matching with rest api counts for current folder`);
                   updateFolderCounts(folderPath).then(
-                    (result) => console.log(result.result.result.msg)
+                    (result) => console.log(result.json())
                   ).catch(
                     (err) => console.log('Error updating folder counts: ' + err.errors.join(','))
                   );
