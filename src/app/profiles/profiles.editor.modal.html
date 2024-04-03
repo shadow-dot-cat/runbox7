@@ -1,12 +1,12 @@
 <mat-card class="mat_card mat-elevation-z0 update create modal-card">
     <mat-card-header class="header">
         <mat-card-title class="header-title">
-            <span *ngIf="is_create">Create profile</span>
-            <span *ngIf="is_update">Edit profile: {{identity.name}}</span>
+            <span *ngIf="is_create">Create identity</span>
+            <span *ngIf="is_update">Edit identity: {{identity.name}}</span>
         </mat-card-title>
         <mat-card-subtitle class="header-subtitle">
             <div *ngIf="identity.type === 'main'">
-                Username Identity
+                Account Identity
             </div>
             <div *ngIf="identity.type === 'aliases'">
                 Alias
