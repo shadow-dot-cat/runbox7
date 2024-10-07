@@ -26,6 +26,7 @@ import { RMMAuthGuardService } from '../rmmapi/rmmauthguard.service';
 import { map, filter } from 'rxjs/operators';
 import { ProgressService } from '../http/progress.service';
 import { NgForm } from '@angular/forms';
+import { JMAPService } from '../jmap/jmap.service';
 
 @Component({
     // eslint-disable-next-line @angular-eslint/component-selector
@@ -51,7 +52,8 @@ export class LoginComponent implements OnInit {
         private router: Router,
         private authservice: RMMAuthGuardService,
         private ngZone: NgZone,
-        public progressService: ProgressService
+        public progressService: ProgressService,
+        private jmap: JMAPService
     ) {
     }
 
@@ -161,6 +163,7 @@ export class LoginComponent implements OnInit {
                 window.location.href = '/mail';
                 return;
             }
+            this.jmap.oauthLogin();
             this.ngZone.run(() => {
                 this.router.navigateByUrl(this.authservice.urlBeforeLogin,
                                           { replaceUrl: true })

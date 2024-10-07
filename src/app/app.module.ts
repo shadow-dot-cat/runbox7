@@ -54,6 +54,7 @@ import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/le
 import { CanvasTableModule } from './canvastable/canvastable';
 import { MoveMessageDialogComponent } from './actions/movemessage.action';
 import { RunboxWebmailAPI } from './rmmapi/rbwebmail';
+import { JMAPService } from './jmap/jmap.service';
 import { RMMOfflineService } from './rmmapi/rmmoffline.service';
 import { ComposeModule } from './compose/compose.module';
 import { DraftDeskComponent } from './compose/draftdesk.component';
@@ -192,6 +193,7 @@ const routes: Routes = [
         MessageListService,
         MobileQueryService,
         RunboxWebmailAPI,
+        JMAPService,
         SearchService,
         RMMOfflineService,
         RMM,

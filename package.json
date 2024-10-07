@@ -57,6 +57,7 @@
     "material-design-icons": "^3.0.1",
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.43",
+    "openid-client": "^6.8.1",
     "otpauth": "^9.1.1",
     "rrule": "^2.7.2",
     "rxjs": "^7.8.0",
