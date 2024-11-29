@@ -70,10 +70,9 @@ type Mail = any;
   templateUrl: 'singlemailviewer.component.html',
   styleUrls: ['singlemailviewer.component.scss']
 })
+
 export class SingleMailViewerComponent implements OnInit, DoCheck, AfterViewInit {
   private lastMailtoInterceptorNode: HTMLElement | null = null;
-
-
   _messageId = null; // Message id or filename
 
   // eslint-disable-next-line @angular-eslint/no-output-on-prefix
