@@ -139,7 +139,10 @@ export abstract class MessageDisplay {
     // click anywhere on a row right of the checkbox, reset the selected rows
     // as we want to open the email instead
     if (columnIndex > 0) {
-      this.msgIdsSelected = {};
+      // invert back, as we didn't want to select it, we wanted to open it:
+      this.flipSelectedRow(this.selectedRowId);
+      // This would empty the selection when opening a message instead:
+      // this.msgIdsSelected = {};
     }
 
     // columnIndex == -1 if drag & drop
