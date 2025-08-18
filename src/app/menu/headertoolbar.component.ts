@@ -33,7 +33,8 @@ import { RunboxMe } from '../rmmapi/rbwebmail';
 export class HeaderToolbarComponent {
 
     rmm6tooltip = 'This area isn\'t upgraded to Runbox 7 yet and will open in a new tab';
-    user_is_trial = false;
+    userIsTrial = false;
+    username = '';
     isMainAccount: boolean;
 
     constructor(
@@ -42,14 +43,13 @@ export class HeaderToolbarComponent {
         private router: Router,
         public logoutservice: LogoutService
     ) {
-         rmmapi.me.subscribe((me: RunboxMe) => {
-         this.isMainAccount = !me.owner;
-        });
     }
 
     ngOnInit() {
         this.rmmapi.me.subscribe(me => {
-           this.user_is_trial = me.is_trial;
+            this.userIsTrial = me.is_trial;
+            this.isMainAccount = !me.owner;
+            this.username = me.user_address;
       });
     }
 

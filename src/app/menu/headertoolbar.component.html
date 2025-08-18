@@ -1,3 +1,4 @@
+<div flex style="flex-direction: column;background-image: linear-gradient(177deg, #0068b7, #003156);" color="primary">{{ username }}</div>
 <mat-toolbar style="background-image: linear-gradient(177deg, #0068b7, #003156);" color="primary" id="mainMenuContainer">
   <a routerLink="/welcome" class="mainMenuLogo"><img src="assets/runbox7_blue.png" id="logo" alt="Runbox 7" /></a>
 
@@ -35,7 +36,7 @@
   
   <span flex style="flex-grow: 1"></span>
 
-  <div *ngIf="user_is_trial" class="mainMenu" id="subscribe">
+  <div *ngIf="userIsTrial" class="mainMenu" id="subscribe">
     <a mat-button routerLink="/account/upgrades">
       <mat-icon svgIcon="wallet-membership"></mat-icon> &nbsp;Subscribe Now
       <p class="mainMenuDesc">Full money back guarantee</p>
@@ -65,14 +66,14 @@
     </a>
   </div>
 
-  <div *ngIf="user_is_trial" class="mainMenu">
+  <div *ngIf="userIsTrial" class="mainMenu">
     <a mat-button routerLink="/account/plans">
       <mat-icon svgIcon="wallet-membership"></mat-icon>
       <p class="mainMenuDesc">Subscribe</p>
     </a>
   </div>
 
-  <div *ngIf="!user_is_trial && isMainAccount" class="mainMenu">
+  <div *ngIf="!userIsTrial && isMainAccount" class="mainMenu">
     <a mat-button routerLink="/account/plans">
       <mat-icon svgIcon="rocket-launch"></mat-icon>
       <p class="mainMenuDesc">Upgrades</p>
