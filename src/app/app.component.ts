@@ -38,7 +38,7 @@ import { DraftDeskService } from './compose/draftdesk.service';
 import { RMM7MessageActions } from './mailviewer/rmm7messageactions';
 import { FolderListComponent, CreateFolderEvent, RenameFolderEvent, MoveFolderEvent } from './folder/folder.module';
 import { SimpleInputDialog, SimpleInputDialogParams } from './dialog/dialog.module';
-import { map, take, skip, mergeMap, filter, tap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { map, mergeMap, filter, tap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { WebSocketSearchService } from './websocketsearch/websocketsearch.service';
 import { WebSocketSearchMailList } from './websocketsearch/websocketsearchmaillist';
 
@@ -1188,11 +1188,6 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
     console.log('Change selectedFolder');
     this.clearSelection();
 
-    let doResetColumns = false;
-    if (folder.startsWith('Sent') || this.selectedFolder?.startsWith('Sent')) {
-      doResetColumns = true;
-    }
-
     this.selectedFolder = folder;
 
     this.messagelistservice.setCurrentFolder(folder);
@@ -1200,7 +1195,6 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
     if (this.viewmode === 'singleconversation') {
       this.viewmode = 'conversations';
       this.conversationSearchText = undefined;
-      doResetColumns = true;
     }
 
     if (this.hasChildRouterOutlet) {
