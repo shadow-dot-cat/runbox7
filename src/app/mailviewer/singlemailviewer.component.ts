@@ -228,6 +228,10 @@ export class SingleMailViewerComponent implements OnInit, DoCheck, AfterViewInit
   }
 
   public close(actionstring?: string) {
+    // Dont loop if already closing..
+    if (this.messageId == null) {
+      return;
+    }
     const doClose = () => {
       if (this.resizer) {
         this.resizer.resizePercentage(0);
