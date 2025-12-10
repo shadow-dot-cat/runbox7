@@ -287,6 +287,7 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
           this.showingWebSocketSearchResults = false;
         }
       } else {
+        this.scrollToIndex.next(0);
         this.setMessageDisplay('websocketlist', results);
         this.showingWebSocketSearchResults = true;
       }
@@ -1250,6 +1251,9 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
           this.showingSearchResults = false;
         }
 
+        if(!noscroll) {
+          this.scrollToIndex.next(0);
+        }
         this.setMessageDisplay('messagelist', this.messagelist);
 
         return;
@@ -1313,6 +1317,9 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
           this.xapianDocCount = this.searchService.api.getXapianDocCount();
           this.searchResultsCount = searchResults.length;
           if (searchResults) {
+            if(!noscroll) {
+              this.scrollToIndex.next(0);
+            }
             this.setMessageDisplay('search', this.searchService, searchResults);
           }
         } catch (e) {
