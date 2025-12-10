@@ -95,7 +95,7 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
     false,
     [],
     true,
-  )
+  );
 
   lastSearchText = '';
   searchText = '';
@@ -113,7 +113,7 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
   localSearchIndexPrompted = false;
   offerInitialLocalIndex = false;
 
-  dragEvent: DragEvent | null = null
+  dragEvent: DragEvent | null = null;
 
   indexDocCount = 0;
 
@@ -217,7 +217,7 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
     public updateService: UpdateAlertService,
   ) {
     this.orderSelectionModel.selectionModel.changed.subscribe(() => {
-      const {data: column, direction} = this.orderSelectionModel.selected
+      const {data: column, direction} = this.orderSelectionModel.selected;
 
       if (direction === Direction.None) {
         this.sort.sortColumn = 2;
@@ -227,8 +227,8 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
         this.sort.sortDescending = Direction.Descending === direction;
       }
 
-      this.updateSearch(true)
-    })
+      this.updateSearch(true);
+    });
 
     this.hotkeysService.add(
         new Hotkey(
@@ -390,7 +390,7 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
     this.orderSelectionModel.selected = {
       data: 2,
       direction: Direction.Descending
-    }
+    };
 
     this.messagelistservice.messagesInViewSubject.subscribe(res => {
       this.messagelist = res;
@@ -434,7 +434,7 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
           this.fragment = fragment;
           this.selectMessageFromFragment(this.fragment);
           if (this.messageTable.rows && this.messageTable.rows.rowCount() > 0) {
-            return
+            return;
           } else {
             this.jumpToFragment = true;
           }
@@ -472,7 +472,7 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
 
     this.router.events.pipe(
       filter(e => e instanceof NavigationEnd)
-    ).subscribe((event: NavigationEnd) => {
+    ).subscribe((_event: NavigationEnd) => {
       this.composeSelected = this.router.url === '/compose?new=true';
       this.draftsSelected = this.router.url === '/compose';
       this.overviewSelected = this.router.url === '/overview';
@@ -587,10 +587,10 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
 
     await this.updateMessages({
       messageIds: [],
-      updateLocal: (msgIds: number[]) => {
+      updateLocal: (_msgIds: number[]) => {
         this.messagelistservice.pretendEmptyTrash();
       },
-      updateRemote: (msgIds: number[]): Observable<any> =>
+      updateRemote: (_msgIds: number[]): Observable<any> =>
         this.rmmapi.emptyFolder(trashFolder.folderId)
     });
 
@@ -693,7 +693,7 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
           this.singlemailviewer.close();
         }
       },
-      updateRemote: (msgIds: number[]) => {
+      updateRemote: (_msgIds: number[]) => {
         const userFolders = this.messagelistservice.folderListSubject.value;
         const currentFolderId = userFolders.find(fld => fld.folderPath === this.messagelistservice.currentFolder).folderId;
         const res = this.rmmapi.trainSpam({is_spam: params.is_spam, from_folder_id: currentFolderId, messages: messageIds});
@@ -873,7 +873,7 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
 
     this.filterMessageDisplay();
 
-    this.updateRows()
+    this.updateRows();
   }
 
   public filterMessageDisplay() {
@@ -894,14 +894,14 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
     const matchingRowIndex = this.messageTable.rows.findRowByMessageId(messageId);
     if (matchingRowIndex > -1) {
       this.rowSelected(matchingRowIndex, 1, false);
-    } 
+    }
   }
 
   public rowSelected(rowIndex: number, columnIndex: number, multiSelect?: boolean) {
     const isSelect = (columnIndex === 0) || multiSelect;
-    const shouldScroll = !this.singlemailviewer.messageId
+    const shouldScroll = !this.singlemailviewer.messageId;
 
-    this.lastCheckedIndex = rowIndex
+    this.lastCheckedIndex = rowIndex;
 
     if (shouldScroll) {
       this.scrollToIndex.next(rowIndex - 1);
@@ -1067,11 +1067,11 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
     // Remove the default image
     event.dataTransfer?.setDragImage(new Image(), 0, 0); // Set an empty image
 
-    this.dragEvent = event
+    this.dragEvent = event;
   }
 
   dropToFolder(folderId): void {
-    const messageIds = this.selectedMessageIds
+    const messageIds = this.selectedMessageIds;
 
     this.updateMessages({
       messageIds: messageIds,
@@ -1092,7 +1092,7 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
           this.singlemailviewer.close();
         }
       },
-      updateRemote: (msgIds: number[]) => {
+      updateRemote: (_msgIds: number[]) => {
         const userFolders = this.messagelistservice.folderListSubject.value;
         const currentFolderId = userFolders.find(fld => fld.folderPath === this.messagelistservice.currentFolder).folderId;
         return this.rmmapi.moveToFolder(messageIds, folderId, currentFolderId);
@@ -1151,7 +1151,7 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
 
   onFolderSelect(folder: string) {
     this.scrollToIndex.next(0);
-    this.selectFolder(folder)
+    this.selectFolder(folder);
   }
 
   selectFolder(folder: string): void {
@@ -1316,7 +1316,7 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
             this.setMessageDisplay('search', this.searchService, searchResults);
           }
         } catch (e) {
-          console.error(e)
+          console.error(e);
         }
 
       }
@@ -1381,9 +1381,9 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
   }
 
   updateRows() {
-    this.rows = this.messageTable?.rows?.rows ? [...this.messageTable.rows.rows] : []
+    this.rows = this.messageTable?.rows?.rows ? [...this.messageTable.rows.rows] : [];
 
-    return this.enrichRows()
+    return this.enrichRows();
   }
 
   async enrichRows() {
@@ -1392,16 +1392,16 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
     const { start, end } = this.renderedRange;
 
     for (let index = start; index < end; index++) {
-      if (index >= this.rows.length) break
+      if (index >= this.rows.length) break;
 
-      this.rows[index] = this.messageTable.rows.getRowData(index, this)
-      this.rows[index].plaintext = this.searchService.messageText(this.rows[index].id)
-      this.rows[index].loaded = true
+      this.rows[index] = this.messageTable.rows.getRowData(index, this);
+      this.rows[index].plaintext = this.searchService.messageText(this.rows[index].id);
+      this.rows[index].loaded = true;
     }
 
-    this.rows = Object.create(this.rows)
+    this.rows = Object.create(this.rows);
 
-    this.rowsSubject.next(this.rows)
+    this.rowsSubject.next(this.rows);
   }
 
   get showNotificationButton() {
@@ -1435,21 +1435,21 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
       this.messageTable.rows.flipSelectedRow(i);
     }
 
-    this.lastCheckedIndex = to
+    this.lastCheckedIndex = to;
 
   }
 
   onCheckboxClick(event, row, index) {
-    this.onRowClick(event, row, index, true)
-    event.stopPropagation()
-    event.preventDefault()
+    this.onRowClick(event, row, index, true);
+    event.stopPropagation();
+    event.preventDefault();
   }
 
   rangeSelect(to: number) {
     const fromIndex = this.lastCheckedIndex;
 
     // When nothing is selected yet.
-    if (fromIndex === -1) return this.oneSelect(to)
+    if (fromIndex === -1) return this.oneSelect(to);
 
     return this.rangeSelectFrom(fromIndex, to);
   }
@@ -1465,8 +1465,8 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
       return this.rangeSelect(index);
     }
 
-    const ctrlKey = event.getModifierState('Control')
-    const metaKey = event.getModifierState('Meta')
+    const ctrlKey = event.getModifierState('Control');
+    const metaKey = event.getModifierState('Meta');
 
     if (ctrlKey || metaKey) {
       return this.oneSelect(index);
@@ -1488,7 +1488,7 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
     // Only work on Enter and space.
     if (event.key !== 'Enter') return;
 
-    return this.onRowClick(event, row, index)
+    return this.onRowClick(event, row, index);
   }
 
   onAllCheckboxChange() {
@@ -1516,7 +1516,7 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
   // This will drop the resolved values.
   onRenderedRangeChange(event) {
     this.renderedRange = event;
-    this.enrichRows()
+    this.enrichRows();
   }
 
   async updateMessages(args) {
@@ -1527,4 +1527,4 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
   }
 }
 
-const idValue = (x: any) => x.id
+const idValue = (x: any) => x.id;

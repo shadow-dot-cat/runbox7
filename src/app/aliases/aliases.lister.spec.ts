@@ -17,7 +17,7 @@
 // along with Runbox 7. If not, see <https://www.gnu.org/licenses/>.
 // ---------- END RUNBOX LICENSE ----------
 
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync } from '@angular/core/testing';
 import { AliasesListerComponent } from './aliases.lister';
 import { MatLegacyDialogModule } from '@angular/material/legacy-dialog';
 import { MatLegacySnackBarModule } from '@angular/material/legacy-snack-bar';
@@ -28,7 +28,7 @@ import { of } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { AliasesEditorModalComponent } from './aliases.editor.modal';
-import { MatLegacyCommonModule, MatLegacyOptionModule } from '@angular/material/legacy-core';
+import { MatLegacyCommonModule } from '@angular/material/legacy-core';
 import { HttpClient } from '@angular/common/http';
 
 describe('AliasesListerComponent', () => {
@@ -138,8 +138,8 @@ describe('AliasesListerComponent', () => {
         expect(modal).toBeTruthy();
 
         fixture.detectChanges();
-        const forwardTo: HTMLInputElement = 
-            modal.querySelector('input[name=\'forward_to\']');
+        // const forwardTo: HTMLInputElement = 
+        //    modal.querySelector('input[name=\'forward_to\']');
         // FIXME: doesn't work, value isn't set, probably because of ngModel
         // expect(forwardTo.value)
         //     .toBe(DEFAULT_EMAIL, "Forward to should default to the user's email");

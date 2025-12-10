@@ -18,7 +18,6 @@
 // ---------- END RUNBOX LICENSE ----------
 
 import { PreferencesService } from '../common/preferences.service';
-import { AppSettings } from '../app-settings';
 import { StorageService } from '../storage.service';
 import { Contact } from './contact';
 import { ContactsService } from './contacts.service';

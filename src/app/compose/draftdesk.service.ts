@@ -71,7 +71,7 @@ export class DraftFormModel {
                          fromAddress: Identity,
                          to: string, subject: string,
                          preview?: string,
-                         message_date?: Date): DraftFormModel {
+                         _message_date?: Date): DraftFormModel {
         const ret = new DraftFormModel();
         ret.from = fromAddress.email;
         ret.mid = draftId;
@@ -267,7 +267,7 @@ export class DraftDeskService {
                             'folderId', 'totalMessages', 'newMessages'
                         ]));
             }))
-            .subscribe((folders) => {
+            .subscribe((_folders) => {
                 this.refreshDrafts();
             });
     }
@@ -315,7 +315,6 @@ export class DraftDeskService {
     public async newTemplateDraft(
         messageId: number,
     ) {
-
         this.rmmapi.getMessageContents(messageId).subscribe((contents) => {
             const res: any = Object.assign({}, contents);
             const {subject} = res.headers;
