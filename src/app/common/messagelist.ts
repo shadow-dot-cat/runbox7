@@ -35,18 +35,18 @@ export class MessageList extends MessageDisplay {
 
   getRowId(index: number): number {
     const msg: MessageInfo = this.rows[index];
-    return msg.id;
+    return msg?.id;
   }
 
   getRowMessageId(index: number): number {
     const msg: MessageInfo = this.rows[index];
-    return msg.id;
+    return msg?.id;
   }
 
 
-  // columns
+  // column conversions (at enhance-time, thus _rows)
   getFromColumnValueForRow(rowIndex: number): string {
-    const rowobj = this.rows[rowIndex];
+    const rowobj = this.getUnfilteredRow(rowIndex);
     return rowobj.from && rowobj.from.length > 0 ?
       rowobj.from[0].name ? rowobj.from[0].name :
       rowobj.from[0].address :
@@ -54,7 +54,7 @@ export class MessageList extends MessageDisplay {
   }
 
   getToColumnValueForRow(rowIndex: number): string {
-    const rowobj = this.rows[rowIndex];
+    const rowobj = this.getUnfilteredRow(rowIndex);
     return rowobj.to && rowobj.to.length > 0 ?
       rowobj.to[0].name ? rowobj.to[0].name :
       rowobj.to[0].address :
@@ -62,29 +62,36 @@ export class MessageList extends MessageDisplay {
   }
 
   // filter visible rows by whatever options the frontend has
-  filterBy(options: Map<string, any>) {
-    this.rows = this._rows;
+  // filterBy(options: Map<string, any>) {
+  //   this.rows = this._rows;
+  //   if (options.has('unreadOnly') && options.get('unreadOnly')) {
+  //     this.rows = this._rows.filter((msg) => !msg.seenFlag);
+  //   }
+  // }
+
+  filterBy(options: Map<string, any>): any[] {
     if (options.has('unreadOnly') && options.get('unreadOnly')) {
-      this.rows = this._rows.filter((msg) => !msg.seenFlag);
+      return this._rows.filter((msg) => !msg.seenFlag);
     }
   }
 
-  getRowData(rowIndex, app) {
-    const row = this.rows[rowIndex];
+  // data enhance - _rows
+  getRowData(rowIndex) {
+    const row = this._rows[rowIndex];
 
     return {
       id: row.id,
       seen: row.seenFlag,
       messageDate: MessageTableRowTool.formatTimestamp(row.messageDate.toJSON()),
-      from: app.selectedFolder === 'Sent'
-        ? this.getToColumnValueForRow(rowIndex)
-        : this.getFromColumnValueForRow(rowIndex),
+      from: this.getFromColumnValueForRow(rowIndex),
+      to: this.getToColumnValueForRow(rowIndex),
       subject: row.subject,
       size: row.size,
       attachment: row.attachment ,
       answered: row.answeredFlag ,
       flagged: row.flaggedFlag ,
       plaintext: row.plaintext?.trim(),
+      count: 1,
     }; 
   }
 }

@@ -335,7 +335,7 @@
           <mat-list>
             <mat-list-item>
               <mat-checkbox
-                [(ngModel)]="messageTable.showContentTextPreview"
+                [(ngModel)]="showContentTextPreview"
                 matLine
                 (change)="saveContentPreviewSetting()"
                 (click)="$event.stopPropagation()"
@@ -431,8 +431,8 @@
                       class="checkbox-cell">
                       <mat-checkbox
                         (change)="onAllCheckboxChange($event)"
-                        [indeterminate]="messageTable.rows.anySelected() && !allItemsSelected"
-                        [checked]="messageTable.rows.anySelected()"
+                        [indeterminate]="messageTable.anySelected() && !allItemsSelected"
+                        [checked]="messageTable.anySelected()"
                         ></mat-checkbox>
                     </th>
                     <th
@@ -527,8 +527,8 @@
                     *ngIf="!item.loaded"
                     [ngClass]="{
                       focussed: lastCheckedIndex === index,
-                      selected: messageTable.rows.isOpenedRow(index),
-                      checked: messageTable.rows.isSelectedRow(index)
+                      selected: messageTable.isOpenedRow(index),
+                      checked: messageTable.isSelectedRow(index)
                     }"
                   >
                     <tr>
@@ -554,7 +554,7 @@
                       <td class="sm-hidden"></td>
                       <td class="sm-hidden"></td>
                     </tr>
-                    <tr class="sm-hidden" *ngIf="messageTable.showContentTextPreview">
+                    <tr class="sm-hidden" *ngIf="showContentTextPreview">
                       <td><!--offset --></td>
                       <td colspan="3">
                         <span class="skeleton-bone"></span>
@@ -572,59 +572,61 @@
                     draggable="true"
                     [ngClass]="{
                       focussed: lastCheckedIndex === item,
-                      selected: messageTable.rows.isOpenedRow(index),
-                      checked: messageTable.rows.isSelectedRow(index)
+                      selected: messageTable.isOpenedRow(index),
+                      checked: messageTable.isSelectedRow(index)
                     }"
                   >
                     <tr>
                       <td (click)="onCheckboxClick($event, item, index)" class="checkbox-cell">
                         <mat-checkbox
                           (click)="onCheckboxClick($event, item, index)"
-                          [checked]="messageTable.rows.isSelectedRow(index)"
+                          [checked]="messageTable.isSelectedRow(index)"
                           tabindex="-1">
                         </mat-checkbox>
                       </td>
                       <td>
-                        {{item.messageDate}}
+                        {{item.display.messageDate}}
                       </td>
 
                       <td
                         [ngClass]="{
-                          'bold': !item.seen
+                          'bold': !item.display.seen
                           }"
 
                         class="text-primary">
-                        {{item.from}}
+                        {{
+                        selectedFolder !== messagelistservice.sentFolderName ? item.display.from : item.display.to
+                        }}
                       </td>
 
                       <td class="subject text-primary"
                           [ngClass]="{
-                           bold: !item.seen
+                           bold: !item.display.seen
                            }">
-                          {{item.subject}}
+                          {{item.display.subject}}
                       </td>
                       <td
                         class="count"
                         *ngIf="viewmode === 'conversations'"
                       >
                         <div
-                          *ngIf="item.count > 1"
+                          *ngIf="item.display.count > 1"
                         >
-                          {{item.count}}
+                          {{item.display.count}}
                         </div>
                       </td>
                       <td class="sm-hidden">
-                        {{item.size | humanBytes}}
+                        {{item.display.size | humanBytes}}
                       </td>
                       <td
                         *ngIf="displayFolderColumn"
                       >
-                        {{item.folder}}
+                        {{item.display.folder}}
                       </td>
                       <td class="sm-hidden">
                         <mat-icon
                           style="transform: rotate(90deg);"
-                          *ngIf="item.attachment"
+                          *ngIf="item.display.attachment"
                           aria-label="Has attachments"
                           mat-list-icon
                           svgIcon="attachment">
@@ -632,7 +634,7 @@
                       </td>
                       <td class="sm-hidden">
                         <mat-icon
-                          *ngIf="item.answered"
+                          *ngIf="item.display.answered"
                           aria-label="answered"
                           mat-list-icon
                           svgIcon="reply">
@@ -640,7 +642,7 @@
                       </td>
                       <td class="sm-hidden">
                         <mat-icon
-                          *ngIf="item.flagged"
+                          *ngIf="item.display.flagged"
                           aria-label="Flagged"
                           mat-list-icon
                           svgIcon="flag">
@@ -651,11 +653,11 @@
                       <td></td>
 
                     </tr>
-                    <tr class="sm-hidden" *ngIf="messageTable.showContentTextPreview">
+                    <tr class="sm-hidden" *ngIf="showContentTextPreview">
                       <!--offset -->
                       <td (click)="onCheckboxClick($event, item, index)"></td>
                       <td colspan="3">
-                        <span class="preview">{{item.plaintext | async}} </span>
+                        <span class="preview">{{item.display.plaintext | async}} </span>
                       </td>
                       <td class="sm-hidden" aria-hidden colspan="4"></td>
                       <td aria-hidden *ngIf="displayFolderColumn"></td>
@@ -736,7 +738,7 @@
 
 <app-follows-mouse *ngIf="dragEvent">
   <mat-card>
-    <mat-icon>mail</mat-icon> Moving {{messageTable.rows.selectedRowIds().length}}
+    <mat-icon>mail</mat-icon> Moving {{messageTable.selectedRowIds().length}}
   </mat-card>
 </app-follows-mouse>
 

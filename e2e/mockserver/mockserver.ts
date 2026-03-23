@@ -1277,6 +1277,12 @@ END:VCALENDAR
     getMessage(mailid: number): any {
         let message_obj = mail_message_obj;
         message_obj.status = 'success';
+
+        if (mailid >0 || mailid < 11) {
+            // Need unique mids
+            message_obj = JSON.parse(JSON.stringify(mail_message_obj));
+            message_obj.result.mid = mailid;
+        }
         if (mailid === 11) {
             message_obj = JSON.parse(JSON.stringify(mail_message_obj));
             const to = message_obj.result.headers['to'];

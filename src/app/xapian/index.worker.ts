@@ -489,10 +489,14 @@ not matching with index for current folder`);
         // if an index update is already running, check we arent
         // updating the same messages
 
+        console.log(this.currentIndexUpdateMessageIds);
         const notIn = msginfos.filter((msg) => !this.currentIndexUpdateMessageIds.has(msg.id));
         if (notIn.length !== msginfos.length) {
           console.log('Worker: Attempted to update index data that was already in progress, skipping');
-          msginfos = [];
+          console.log(msginfos);
+          console.log(notIn);
+          //msginfos = [];
+          msginfos = notIn;
         }
       }
       msginfos.forEach((msg) => this.currentIndexUpdateMessageIds.add(msg.id));
@@ -928,19 +932,22 @@ not matching with rest api counts for current folder`);
     if (!this.api || !this.localSearchActivated) {
       return;
     }
+    console.log('Worker: API activated');
+
     of(this.folderList)
       .pipe(take(1))
       .subscribe((folders) => {
         const destinationFolder = folders.find(folder => folder.folderPath === destinationfolderPath);
 
         if (destinationFolder.folderType === 'spam' || destinationFolder.folderType === 'trash') {
+          console.log('posting messagesToXapian');
           this.postMessagesToXapianWorker(messageIds.map(mid =>
             new SearchIndexDocumentUpdate(mid, () => {
-                try {
+              try {
                   this.api.deleteDocumentByUniqueTerm('Q' + mid);
-                  console.log('Deleted msg id search index', mid);
+                console.log('Worker: Deleted msg id search index', mid);
                 } catch (e) {
-                  console.error('Unable to delete message from search index (not found?)', mid, e);
+                  console.error('Worker: Unable to delete message from search index (not found?)', mid, e);
                 }
               })
             )
