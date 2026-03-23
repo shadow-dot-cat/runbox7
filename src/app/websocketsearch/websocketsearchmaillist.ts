@@ -42,21 +42,21 @@ export class WebSocketSearchMailList extends MessageDisplay {
     return msg.id;
   }
 
-  filterBy(options: Map<string, any>) {
-    this.rows = this._rows;
+  filterBy(options: Map<string, any>): any[] {
     if (options.has('unreadOnly') && options.get('unreadOnly')) {
-      this.rows = this._rows.filter((msg) => !msg.seen);
+      return this._rows.filter((msg) => !msg.seen);
     }
   }
 
-  getRowData(rowIndex, app) {
+  getRowData(rowIndex) {
     return {
       id: this.getRowMessageId(rowIndex),
       selectbox: this.isSelectedRow(rowIndex),
-      messageDate: this.getRow(rowIndex).dateTime,
-      from: this.getRow(rowIndex).fromName,
-      subject: this.getRow(rowIndex).subject,
-      size: this.getRow(rowIndex).size,
+      messageDate: this.getUnfilteredRow(rowIndex).dateTime,
+      from: this.getUnfilteredRow(rowIndex).fromName,
+      to: '?',
+      subject: this.getUnfilteredRow(rowIndex).subject,
+      size: this.getUnfilteredRow(rowIndex).size,
       seen: this.getRowSeen(rowIndex)
     };
   }

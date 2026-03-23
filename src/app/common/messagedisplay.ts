@@ -20,28 +20,34 @@
 export abstract class MessageDisplay {
   public openedRowIndex: number;
   public selectedRowId: number;
-  //  public openedRowId: number;
   public msgIdsSelected: { [key: number]: boolean } = {};
-  // public selectedRowIds: { [key: number]: boolean } = {};
   public hasChanges: boolean;
+  public filterOptions: Map<String, any>;
 
   // ALL rows
   public _rows = [];
-  // Rows for actual display
+  // (Subset of) raw rows for actual display
   public rows = [];
 
+  public renderedRange = {start: 0, end: 0};
+
   constructor(rows: any) {
-    this._rows = rows;
-    // default to all rows, see filterBy for reduced sets
-    this.rows = rows;
+    this.setRows(rows);
   }
 
   setRows(rows: any) {
     this._rows = rows;
-    this.rows = rows;
+    console.log(`MD update rows len: ${this._rows.length}`);
+    // set after enriching:
+    this.rows = [];
+
+    // zoom and enhance:
+    // this.enrichRows();
+
+    // defaults to all rows, see filterBy for reduced sets
   }
 
-  // rows:
+  // displayed rows count:
   rowCount(): number {
     return this.rows.length;
   }
@@ -91,6 +97,7 @@ export abstract class MessageDisplay {
     delete this.msgIdsSelected[msgId];
   }
 
+  // row clicked on (any field that isnt the checkbox)
   public getCurrentRow(): any {
     return this.rows[this.openedRowIndex];
   }
@@ -170,8 +177,8 @@ export abstract class MessageDisplay {
   abstract getRowId(index: number): number;
   abstract getRowMessageId(index: number): number;
 
-  public getRow(index: number): any {
-    return this.rows[index];
+  public getUnfilteredRow(index: number): any {
+    return this._rows[index];
   }
 
   rowExists(index: number): boolean {
@@ -183,8 +190,14 @@ export abstract class MessageDisplay {
   }
 
   isSelectedRow(index: number): boolean {
+    if (index >= this.rows.length) {
+      return false;
+    }
     const msgId = this.getRowMessageId(index);
-    return this.msgIdsSelected[msgId] === true;
+    if (msgId > 0) {
+      return this.msgIdsSelected[msgId] === true;
+    }
+    return false;
   }
 
   isOpenedRow(index: number): boolean {
@@ -194,16 +207,46 @@ export abstract class MessageDisplay {
   clearSelection() {
     this.selectedRowId = null;
     this.msgIdsSelected = {};
-//    this.openedRowIndex = null;
   }
 
   clearOpenedRow() {
     this.openedRowIndex = null;
   }
 
+  // Which messages are (about to be) shown?
+  // used to pre-fetch message contents
+  getDisplayedMessageIds() {
+    const { start, end } = this.renderedRange;
+
+    return this._rows.filter(
+      (val, index) => index >= start && index <= end).map(
+        (val, index) => this._rows[index]);
+  }
+
+  // enhance / homogenise row data:
+  async enrichRows(cbPreDisplay) {
+    if (!this._rows.length) return;
+
+    const { start, end } = this.renderedRange;
+
+    // filter unread _rows, mapping _row indexes to filtered indexes
+
+    const messageIds = [];
+    for (let index = start; index < end; index++) {
+      if (index >= this._rows.length) break;
+
+      this._rows[index].display = this.getRowData(index);
+      messageIds.push(this._rows[index].display.id);
+      this._rows[index].loaded = true;
+    }
+    cbPreDisplay(messageIds);
+
+    this.rows = this._rows;
+  }
+
   // filtering:
-  abstract filterBy(options: Map<string, any>);
+  abstract filterBy(options: Map<string, any>): any[];
 
   // columns
-  abstract getRowData(index: number, app: any): any;
+  abstract getRowData(index: number): any;
 }
