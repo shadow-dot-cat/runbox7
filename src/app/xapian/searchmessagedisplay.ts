@@ -36,7 +36,7 @@ export class SearchMessageDisplay extends MessageDisplay {
     const row_list = [];
     if(rows.length > 0) {
       rows.forEach((val) => {
-        row_list.push({"docId": val[0], "threaded": val[1] + 1 });
+        row_list.push({'docId': val[0], 'threaded': val[1] + 1 });
       });
     }
     super.setRows(row_list);    

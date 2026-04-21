@@ -1080,7 +1080,7 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
         console.log(`Drop to ${folderPath}`);
         // moveMessagesToFolder cant see these cos not in index
         if (!this.messagelistservice.unindexedFolders.includes(this.selectedFolder)) {
-          console.log(`Drop from unindexedfolders (move in Index)`);
+          console.log('Drop from unindexedfolders (move in Index)');
           this.searchService.moveMessagesToFolder(msgIds, folderPath);
         }
         this.messagelistservice.moveMessages(msgIds, folderPath);

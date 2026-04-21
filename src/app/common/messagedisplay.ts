@@ -22,7 +22,7 @@ export abstract class MessageDisplay {
   public selectedRowId: number;
   public msgIdsSelected: { [key: number]: boolean } = {};
   public hasChanges: boolean;
-  public filterOptions: Map<String, any>;
+  public filterOptions: Map<string, any>;
 
   // ALL rows
   public _rows = [];
