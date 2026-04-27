@@ -84,7 +84,7 @@ export class SearchMessageDisplay extends MessageDisplay {
       answered: this.searchService.getDocData(this.getRowId(index)).answered ? true : false,
       flagged: this.searchService.getDocData(this.getRowId(index)).flagged ? true : false,
       folder: this.searchService.getDocData(this.getRowId(index)).folder,
-      seen: this.searchService.getDocData(this.getRowId(index)).seen,
+      seen: this.searchService.getDocData(this.getRowId(index)).seen ? true : false,
       count: this._rows[index].threaded,
     };
 
