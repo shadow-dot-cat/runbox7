@@ -29,6 +29,10 @@ export abstract class MessageDisplay {
   // (Subset of) raw rows for actual display
   public rows = [];
 
+  // Optimistic flag overrides, keyed by message ID.
+  // Applied after enrichRows reads (possibly stale) data from the index.
+  private flagOverrides = new Map<number, { seen?: boolean; flagged?: boolean }>();
+
   public renderedRange = {start: 0, end: 0};
 
   constructor(rows: any) {
@@ -106,6 +110,41 @@ export abstract class MessageDisplay {
     return this.rows.findIndex((element, index) => {
       return this.getRowMessageId(index) === messageId;
     });
+  }
+
+  /**
+   * Apply a flag change (seen/flagged) directly to the display row,
+   * bypassing the slow worker round-trip. Returns true if a row was updated.
+   * Creates new row and array references so the child virtual scroll table's
+   * OnPush change detection picks up the change.
+   * The override is also recorded so enrichRows (e.g. from scroll) preserves
+   * the optimistic value until the index data catches up.
+   */
+  public applyFlagChange(change: { id: number, seenFlag: boolean, flaggedFlag: boolean }): boolean {
+    const rowIndex = this.findRowByMessageId(change.id);
+    if (rowIndex < 0 || !this.rows[rowIndex] || !this.rows[rowIndex].display) {
+      return false;
+    }
+    const oldRow = this.rows[rowIndex];
+    const newDisplay = { ...oldRow.display };
+    const override: { seen?: boolean; flagged?: boolean } = {};
+    if (change.seenFlag !== null && change.seenFlag !== undefined) {
+      newDisplay.seen = change.seenFlag;
+      override.seen = change.seenFlag;
+    }
+    if (change.flaggedFlag !== null && change.flaggedFlag !== undefined) {
+      newDisplay.flagged = change.flaggedFlag;
+      override.flagged = change.flaggedFlag;
+    }
+    this.flagOverrides.set(change.id, override);
+    const newRow = { ...oldRow, display: newDisplay };
+    const newRows = [...this.rows];
+    newRows[rowIndex] = newRow;
+    this.rows = newRows;
+    if (this._rows[rowIndex]) {
+      this._rows[rowIndex] = newRow;
+    }
+    return true;
   }
 
   public removeMessages(messageIds: number[]) {
@@ -229,14 +268,18 @@ export abstract class MessageDisplay {
 
     const { start, end } = this.renderedRange;
 
-    // filter unread _rows, mapping _row indexes to filtered indexes
-
     const messageIds = [];
     for (let index = start; index < end; index++) {
       if (index >= this._rows.length) break;
 
       this._rows[index].display = this.getRowData(index);
-      messageIds.push(this._rows[index].display.id);
+      const msgId = this._rows[index].display.id;
+      const override = this.flagOverrides.get(msgId);
+      if (override) {
+        if (override.seen !== undefined) this._rows[index].display.seen = override.seen;
+        if (override.flagged !== undefined) this._rows[index].display.flagged = override.flagged;
+      }
+      messageIds.push(msgId);
       this._rows[index].loaded = true;
     }
     cbPreDisplay(messageIds);

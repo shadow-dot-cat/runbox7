@@ -45,7 +45,7 @@ import { WebSocketSearchService } from './websocketsearch/websocketsearch.servic
 import { WebSocketSearchMailList } from './websocketsearch/websocketsearchmaillist';
 
 // import { from, Observable, BehaviorSubject, firstValueFrom, of } from 'rxjs';
-import { from, Observable, BehaviorSubject, lastValueFrom} from 'rxjs';
+import { from, Observable, BehaviorSubject, Subject, merge, lastValueFrom} from 'rxjs';
 import { xapianLoadedSubject } from './xapian/xapianwebloader';
 import { SwPush } from '@angular/service-worker';
 import { exportKeysFromJWK } from './webpush/vapid.tools';
@@ -90,7 +90,12 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
   rows = [];
 
   private rowsSubject= new BehaviorSubject(this.rows);
-  debouncedRows = this.rowsSubject.asObservable().pipe(debounceTime(300));
+  // Flag changes bypass the debounce for immediate UI feedback
+  private flagRowsSubject = new Subject<any[]>();
+  debouncedRows = merge(
+    this.rowsSubject.asObservable().pipe(debounceTime(300)),
+    this.flagRowsSubject
+  );
 
   lastCheckedIndex = -1;
   scrollToIndex = new BehaviorSubject<number>(0);
@@ -290,6 +295,14 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
         this.scrollToIndex.next(0);
         this.setMessageDisplay('websocketlist', results);
         this.showingWebSocketSearchResults = true;
+      }
+    });
+
+    // Update the displayed row immediately when a flag changes (seen/flagged),
+    // instead of waiting for the worker round-trip to re-enrich.
+    this.rmmapi.messageFlagChangeSubject.subscribe((change) => {
+      if (this.messageTable && this.messageTable.applyFlagChange(change)) {
+        this.flagRowsSubject.next(this.messageTable.rows);
       }
     });
 
@@ -974,11 +987,7 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
 
     // don't scroll to top when redrawing after index updates
     if (!this.hasChildRouterOutlet) {
-      console.log('afterUpdateIndex, updateSearch');
-      setTimeout(() => {
-        this.updateSearch(true, true);
-      }, 1000);
-//      this.updateSearch(true, true);
+      this.updateSearch(true, true);
     }
 
   }
